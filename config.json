@@ -1,4 +1,4 @@
 ﻿{
-    "connectionString": "mongodb://localhost/node-mongo-registration-login-api",
+    "connectionString": "mongodb://localhost/piller-db",
     "secret": "EkJNKCkfXC4J7Rd"
 }
