@@ -9,7 +9,7 @@ router.get('/', getAll);
 router.get('/current', getCurrent);
 router.get('/:id', getById);
 router.put('/:id', update);
-router.delete('/:id', _delete);
+router.delete('/:email', _delete);
 
 module.exports = router;
 
@@ -50,7 +50,7 @@ function update(req, res, next) {
 }
 
 function _delete(req, res, next) {
-    userService.delete(req.params.id)
+    userService.delete(req.params.email)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
