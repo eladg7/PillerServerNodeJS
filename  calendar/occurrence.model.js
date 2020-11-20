@@ -12,8 +12,10 @@ const schema = new Schema({
 
 schema.set('toJSON', {
     virtuals: true,
-    versionKey: false
-
+    versionKey: false,
+    transform: function (doc, ret) {
+        delete ret._id;
+    }
 });
 
 module.exports = mongoose.model('Occurrence', schema);
