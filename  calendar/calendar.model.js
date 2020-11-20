@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const schema = new Schema({
     email: {type: String, unique: true,required: true},
     name: {type: String, required: true},
-    drugList: [{'drug':String,'time_intake': String,'date':String}]
+    drugList: [{'drug':String,'event_id':String}]
 });
 
 schema.set('toJSON', {
