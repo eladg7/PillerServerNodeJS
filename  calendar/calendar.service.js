@@ -24,7 +24,7 @@ async function getByEmailAndName(email, name) {
             drugInfoList.push({"drug":drug,"drug_info":drugInfo});
         }
     }
-    return drugInfoList;
+    return {"drug_info_list":drugInfoList};
 }
 
 
