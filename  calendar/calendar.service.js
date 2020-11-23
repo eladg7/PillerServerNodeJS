@@ -33,8 +33,7 @@ async function getByEmailAndName(email, name) {
     "update_status":"add",
     "drug_info":{
         "drug":"acamol",
-        "time_intake":"15:03:00",
-        "date_intake":"11/20/2020",
+        "repeat_start":"1123240000",
         "repeat_year":null,
         "repeat_month":null,
         "repeat_day":null,
@@ -67,10 +66,10 @@ async function update(email, name, userParam) {
 
 async function add_drug(calendar, new_drug_info) {
     var drugList = calendar.drugList;
-    const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
-    const seconds = date.getTime() //todo  time convert from utc0
+    // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
+    // const seconds = date.getTime()
     const occurrence = new Occurrence({
-        repeat_start: seconds, repeat_year: new_drug_info.repeat_year,
+        repeat_start: new_drug_info.repeat_start, repeat_year: new_drug_info.repeat_year,
         repeat_month: new_drug_info.repeat_month, repeat_day: new_drug_info.repeat_day,
         repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday
     });
