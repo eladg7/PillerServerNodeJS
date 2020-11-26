@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    repeat_start: {type: Number, required: true,default:Date.now},
-    repeat_year:{type: Number,default:null},
-    repeat_month:{type: Number,default:null},
-    repeat_day:{type: Number,default:null},
-    repeat_week:{type: Number,default:null},
-    repeat_weekday:{type: Number,default:null}
+    repeat_start: {type: String, required: true,default:Date.now},
+    repeat_year:{type: String,default:"-1"},
+    repeat_month:{type: String,default:"-1"},
+    repeat_day:{type: String,default:"-1"},
+    repeat_week:{type: String,default:"-1"},
+    repeat_weekday:{type: String,default:"-1"}
 });
 
 schema.set('toJSON', {

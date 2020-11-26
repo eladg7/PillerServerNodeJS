@@ -33,11 +33,11 @@ async function getByEmailAndName(email, name) {
     "update_status":"add",
     "drug_info":{
         "drug":"acamol",
-        "repeat_start":"1123240000",
-        "repeat_year":null,
-        "repeat_month":null,
-        "repeat_day":null,
-        "repeat_week":null,
+        "repeat_start":"1606302569494",
+        "repeat_year":-1,
+        "repeat_month":-1,
+        "repeat_day":-1,
+        "repeat_week":-1,
         "repeat_weekday":2
     }
 }
