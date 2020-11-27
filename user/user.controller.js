@@ -32,5 +32,4 @@ function _delete(req, res, next) {
     userService.delete(req.params.email)
         .then(() => res.json({}))
         .catch(err => next(err));
-    //todo delete supervisors db, delete profile db, delete calender db if not deleted in app.
 }

@@ -15,7 +15,8 @@ app.use(cors());
 
 // api routes
 app.use('/user', require('./user/user.controller'));
-app.use('/calendar', require('./ calendar/calendar.controller'));
+app.use('/calendar', require('./calendar/calendar.controller'));
+app.use('/profile', require('./profile/profile.controller'));
 
 
 

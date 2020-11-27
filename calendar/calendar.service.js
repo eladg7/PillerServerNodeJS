@@ -111,5 +111,16 @@ async function delete_drug(calendar, new_drug_info) {
 }
 
 async function _delete(email) {
-    await User.deleteOne({email: email});
+    const calendar = await Calendar.findOne({email: email, name: name});
+    // validate
+    if (!calendar) throw 'User\'s calendar not found';
+    var drugList=calendar.drugList;
+
+    // delete all occurances in calendar
+    for (var i = 0; i < drugList.length; i++) {
+        const event_id = drugList[i].event_id;
+        await Occurrence.findByIdAndDelete(event_id);
+    }
+
+    await Calendar.deleteOne({email: email});
 }
