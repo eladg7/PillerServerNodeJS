@@ -8,6 +8,7 @@ module.exports = {
     authenticate,
     create,
     update,
+    updatePassword,
     delete: _delete
 };
 
@@ -40,11 +41,31 @@ async function create(userParam) {
     await user.save();
 }
 
+async function updatePassword(email, userParam) {
+    const user = await User.findOne({email: email});
+
+    // validate
+    if (!user) throw 'User ' + email + ' not found';
+    const userData = userParam.nameValuePairs
+    if (!bcrypt.compareSync(userData.oldPassword, user.password)) {
+        throw 'Wrong password';
+    }
+
+    // hash password if it was entered
+    if (userData.password) {
+        userData.password = bcrypt.hashSync(userData.password, 10);
+    }
+    // copy userParam properties to user
+    Object.assign(user, userData);
+
+    await user.save();
+}
+
 async function update(email, userParam) {
     const user = await User.findOne({email: email});
 
     // validate
-    if (!user) throw 'User '+email+ ' not found';
+    if (!user) throw 'User ' + email + ' not found';
     if (user.email !== userParam.email && await User.findOne({email: userParam.email})) {
         throw 'Email "' + userParam.email + '" is already taken';
     }
@@ -61,5 +82,6 @@ async function update(email, userParam) {
 }
 
 async function _delete(email) {
+    //  todo delete everything that the user has - calendar, supervisors etc.
     await User.deleteOne({email: email});
 }
