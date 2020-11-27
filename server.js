@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const jwt = require('_helpers/jwt');
 const errorHandler = require('_helpers/error-handler');
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -17,8 +17,6 @@ app.use(cors());
 app.use('/user', require('./user/user.controller'));
 app.use('/calendar', require('./calendar/calendar.controller'));
 app.use('/profile', require('./profile/profile.controller'));
-
-
 
 // global error handler
 app.use(errorHandler);

@@ -3,6 +3,7 @@ const router = express.Router();
 const userService = require('./user.service');
 
 // routes
+router.get('/resetPassword/:email', emailResetPassword);
 router.post('/authenticate', authenticate);
 router.post('/register', register);
 router.put('/:email', update);
@@ -10,6 +11,12 @@ router.put('/updatePassword/:email', updatePassword);
 router.delete('/:email', _delete);
 
 module.exports = router;
+
+function emailResetPassword(req, res, next) {
+    userService.emailResetPassword(req.params.email)
+        .then(() => res.json({}))
+        .catch(err => next(err));
+}
 
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
