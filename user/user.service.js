@@ -3,13 +3,18 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const User = db.User;
+const passwordGenerator = require('generate-password');
+const sendMail = require('_helpers/mailManager');
+
+const resetPasswordLength = 7;
 
 module.exports = {
     authenticate,
     create,
     update,
     updatePassword,
-    delete: _delete
+    delete: _delete,
+    emailResetPassword
 };
 
 async function authenticate({email, password}) {
@@ -23,8 +28,22 @@ async function authenticate({email, password}) {
     }
 }
 
+async function emailResetPassword(email) {
+    const user = await User.findOne({email: email});
+    if (!user) throw 'Email ' + email + ' not found';
+
+    const newPassword = passwordGenerator.generate({
+        length: resetPasswordLength,
+        numbers: true
+    });
+    //  save hashed password
+    user.password = bcrypt.hashSync(newPassword, 10);
+    await user.save();
+    sendMail([user.email], 'Password Reset', 'Your password was reset, your new password is: ' + newPassword)
+}
+
+
 async function create(userParam) {
-    console.log(userParam);
     // validate
     if (await User.findOne({email: userParam.email})) {
         throw 'Email "' + userParam.name + '" is already taken';
