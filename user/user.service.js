@@ -61,9 +61,5 @@ async function update(email, userParam) {
 }
 
 async function _delete(email) {
-    const user = await User.findOne({email: email});
-
-    // validate
-    if (!user) throw 'User '+email+ ' not found';
     await User.deleteOne({email: email});
 }
