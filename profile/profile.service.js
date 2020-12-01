@@ -11,47 +11,47 @@ module.exports = {
     deleteProfile
 };
 
-async function getAllProfiles(email){
+async function getAllProfiles(email) {
     var profileList = [];
     var userProfiles = await Profile.findOne({email: email})
     if (userProfiles) {
         const profiles = userProfiles.secondaryProfileList;
         for (var i = 0; i < profiles.length; i++) {
-            const profile_name= profiles[i];
+            const profile_name = profiles[i];
             profileList.push(profile_name);
         }
     }
-    return {"profile_list":profileList};
+    return {"profile_list": profileList};
 }
+
 /*
 {
 	"profile_name":"katya2"
 }
  */
-async function addProfile(email,userParams){
+async function addProfile(email, profileName) {
     var userProfiles = await Profile.findOne({email: email})
     if (!userProfiles) {
-        userProfiles=new Profile({email: email, secondaryProfileList: []})
+        userProfiles = new Profile({email: email, secondaryProfileList: []})
     }
 
-    const newProfile=userParams.profile_name
-    if(userProfiles.secondaryProfileList.indexOf(newProfile) >= 0){
+    if (userProfiles.secondaryProfileList.indexOf(profileName) >= 0) {
         // exists in list
         throw 'Profile already exists.';
 
-    }else{
-        userProfiles.secondaryProfileList.push(newProfile)
+    } else {
+        userProfiles.secondaryProfileList.push(profileName)
         await userProfiles.save()
     }
 }
 
 
-async function deleteProfile(email,name){
+async function deleteProfile(email, name) {
     var userProfiles = await Profile.findOne({email: email})
     if (userProfiles) {
-        var profileList=userProfiles.secondaryProfileList
+        var profileList = userProfiles.secondaryProfileList
         for (var i = 0; i < profileList.length; i++) {
-            if( profileList[i] === name){
+            if (profileList[i] === name) {
                 profileList.splice(i, 1);
                 break;
             }
@@ -61,6 +61,6 @@ async function deleteProfile(email,name){
     }
 }
 
-async function deleteAllProfiles(email){
+async function deleteAllProfiles(email) {
     await Profile.deleteOne({email: email});
 }
