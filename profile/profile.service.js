@@ -35,9 +35,14 @@ async function addProfile(email,userParams){
     }
 
     const newProfile=userParams.profile_name
-    userProfiles.secondaryProfileList.push(newProfile)
-    await userProfiles.save()
+    if(userProfiles.secondaryProfileList.indexOf(newProfile) >= 0){
+        // exists in list
+        throw 'Profile already exists.';
 
+    }else{
+        userProfiles.secondaryProfileList.push(newProfile)
+        await userProfiles.save()
+    }
 }
 
 
