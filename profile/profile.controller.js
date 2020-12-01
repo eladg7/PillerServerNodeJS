@@ -4,7 +4,7 @@ const profileService = require('./profile.service');
 
 // routes
 router.get('/:email', getAllProfiles);
-router.post('/:email', addProfile);
+router.post('/:email/:name', addProfile);
 router.delete('/:email/:name', deleteProfile);
 router.delete('/:email', deleteAllProfiles);
 
@@ -21,7 +21,7 @@ function getAllProfiles(req, res, next) {
 }
 
 function addProfile(req, res, next) {
-    profileService.addProfile(req.params.email, req.body)
+    profileService.addProfile(req.params.email, req.params.name)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
