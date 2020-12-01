@@ -4,7 +4,9 @@ const Occurrence = db.Occurrence;
 
 module.exports = {
     getByEmailAndName,
-    update,
+    add_drug,
+    delete_drug,
+    update_drug,
     delete: _delete
 };
 
@@ -17,20 +19,19 @@ async function getByEmailAndName(email, name) {
         await calendar.save();
     } else {
         const drugList = calendar.drugList;
-        for (var i = 0; i < drugList.length; i++) {
-            const drug= drugList[i].drug;
-            const eventId =  drugList[i].event_id;
-            const drugInfo=await Occurrence.findById(eventId);
-            drugInfoList.push({"drug":drug,"drug_info":drugInfo});
+        for (let i = 0; i < drugList.length; i++) {
+            const drug = drugList[i].drug;
+            const eventId = drugList[i].event_id;
+            const drugInfo = await Occurrence.findById(eventId);
+            drugInfoList.push({"drug": drug, "drug_info": drugInfo});
         }
     }
-    return {"drug_info_list":drugInfoList};
+    return {"drug_info_list": drugInfoList};
 }
 
 
 /*
 {
-    "update_status":"add",
     "drug_info":{
         "drug":"acamol",
         "repeat_start":"1606302569494",
@@ -42,30 +43,12 @@ async function getByEmailAndName(email, name) {
     }
 }
  */
-async function update(email, name, userParam) {
+
+async function add_drug(email, name, userParam) {
     const calendar = await Calendar.findOne({email: email, name: name});
-    // validate
     if (!calendar) throw 'User\'s calendar not found';
-
-    var update_stat = userParam.update_status;
-    var new_drug_info = userParam.drug_info;
-    switch (update_stat) {
-        case 'add':
-            add_drug(calendar, new_drug_info);
-            break;
-        case 'update':
-            update_drug(calendar, new_drug_info);
-            break;
-        case 'delete':
-            delete_drug(calendar, new_drug_info);
-            break;
-    }
-
-
-}
-
-async function add_drug(calendar, new_drug_info) {
-    var drugList = calendar.drugList;
+    const new_drug_info = userParam.drug_info;
+    const drugList = calendar.drugList;
     // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
     // const seconds = date.getTime()
     const occurrence = new Occurrence({
@@ -80,26 +63,22 @@ async function add_drug(calendar, new_drug_info) {
     var new_drug = {'drug': drug_name, 'event_id': event_id}
     drugList.push(new_drug);
     await calendar.save();
-
 }
 
-async function update_drug(calendar, new_drug_info) {
-    var drugList = calendar.drugList;
-    for (var i = 0; i < drugList.length; i++) {
-        if (drugList[i].drug === new_drug_info.drug) {
-            const event_id = drugList[i].event_id;
-            await Occurrence.findByIdAndDelete(event_id);
-            drugList.splice(i, 1);
-            break;
-        }
-    }
-
-    add_drug(calendar, new_drug_info);
+async function update_drug(email, name, userParam) {
+    const calendar = await Calendar.findOne({email: email, name: name});
+    if (!calendar) throw 'User\'s calendar not found';
+    //  in order to update we just delete the original and then insert a new one
+    await delete_drug(email, name, userParam);
+    await add_drug(email, name, userParam);
 }
 
-async function delete_drug(calendar, new_drug_info) {
-    var drugList = calendar.drugList;
-    for (var i = 0; i < drugList.length; i++) {
+async function delete_drug(email, name, userParam) {
+    const calendar = await Calendar.findOne({email: email, name: name});
+    if (!calendar) throw 'User\'s calendar not found';
+    const new_drug_info = userParam.drug_info;
+    const drugList = calendar.drugList;
+    for (let i = 0; i < drugList.length; i++) {
         if (drugList[i].drug === new_drug_info.drug) {
             const event_id = drugList[i].event_id;
             await Occurrence.findByIdAndDelete(event_id);
@@ -114,10 +93,10 @@ async function _delete(email) {
     const calendar = await Calendar.findOne({email: email, name: name});
     // validate
     if (!calendar) throw 'User\'s calendar not found';
-    var drugList=calendar.drugList;
+    const drugList = calendar.drugList;
 
     // delete all occurances in calendar
-    for (var i = 0; i < drugList.length; i++) {
+    for (let i = 0; i < drugList.length; i++) {
         const event_id = drugList[i].event_id;
         await Occurrence.findByIdAndDelete(event_id);
     }
