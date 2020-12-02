@@ -8,8 +8,18 @@ module.exports = {
     getAllProfiles,
     addProfile,
     deleteAllProfiles,
-    deleteProfile
+    deleteProfile,
+    initProfileList
 };
+
+async function initProfileList(email, profileName) {
+    var userProfiles = await Profile.findOne({email: email})
+    if (!userProfiles) {
+        userProfiles = new Profile({email: email, mainProfile: profileName, secondaryProfileList: []})
+        await userProfiles.save()
+    }
+}
+
 
 async function getAllProfiles(email) {
     var profileList = [];
@@ -32,10 +42,11 @@ async function getAllProfiles(email) {
 async function addProfile(email, profileName) {
     var userProfiles = await Profile.findOne({email: email})
     if (!userProfiles) {
-        userProfiles = new Profile({email: email, secondaryProfileList: []})
+        throw 'Profiles does not exist.';
     }
 
-    if (userProfiles.secondaryProfileList.indexOf(profileName) >= 0) {
+    if (userProfiles.secondaryProfileList.indexOf(profileName) >= 0
+        || userProfiles.mainProfile === profileName) {
         // exists in list
         throw 'Profile already exists.';
 
