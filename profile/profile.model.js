@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    email: {type: String, required: true},
-    secondaryProfileList:[String]
+    email: {type: String, unique: true, required: true},
+    mainProfile: {type: String, required: true},
+    secondaryProfileList: [String]
 
 });
 
