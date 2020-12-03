@@ -13,5 +13,6 @@ module.exports = {
     User: require('../user/user.model'),
     Calendar: require('../calendar/calendar.model'),
     Occurrence: require('../calendar/occurrence.model'),
-    Profile: require('../profile/profile.model')
+    Profile: require('../profile/profile.model'),
+    Supervisors: require('../supervisors/supervisors.model')
 };

@@ -34,11 +34,7 @@ async function getAllProfiles(email) {
     return {"profile_list": profileList};
 }
 
-/*
-{
-	"profile_name":"katya2"
-}
- */
+
 async function addProfile(email, profileName) {
     var userProfiles = await Profile.findOne({email: email})
     if (!userProfiles) {

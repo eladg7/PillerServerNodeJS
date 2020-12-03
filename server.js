@@ -17,6 +17,8 @@ app.use(cors());
 app.use('/user', require('./user/user.controller'));
 app.use('/calendar', require('./calendar/calendar.controller'));
 app.use('/profile', require('./profile/profile.controller'));
+app.use('/supervisors', require('./supervisors/supervisors.controller'));
+
 
 // global error handler
 app.use(errorHandler);
