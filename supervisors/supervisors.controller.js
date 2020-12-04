@@ -3,7 +3,7 @@ const router = express.Router();
 const supervisorsService = require('./supervisors.service');
 
 // routes
-router.post('/:email', initSupervisors);
+router.get('/:email', getSupervisors);
 router.put('/threshold/:email/:threshold', updateThreshold);
 router.get('/threshold/:email', getThreshold);
 router.put('/counter/:email/:drugName', addMissedToCounterDrug);
@@ -13,9 +13,9 @@ router.delete('/:email', deleteSupervisorList);
 module.exports = router;
 
 
-function initSupervisors(req,res,next){
-    supervisorsService.initSupervisors(req.params.email)
-        .then(() => res.json({}))
+function getSupervisors(req,res,next){
+    supervisorsService.getSupervisors(req.params.email)
+        .then(supervisors => res.json(supervisors))
         .catch(err => next(err));
 }
 

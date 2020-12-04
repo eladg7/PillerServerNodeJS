@@ -5,7 +5,7 @@ const db = require('_helpers/db');
 const Supervisors = db.Supervisors;
 
 module.exports = {
-    initSupervisors,
+    getSupervisors,
     updateThreshold,
     getThreshold,
     addMissedCounterToDrug,
@@ -14,15 +14,14 @@ module.exports = {
 };
 
 
-async function initSupervisors(email) {
+async function getSupervisors(email) {
 
     var userSupervisors = await Supervisors.findOne({email: email});
     if (!userSupervisors) {
         userSupervisors = new Supervisors({email: email, missedDrugEvents: [], threshold: 3})
         await userSupervisors.save();
-    } else {
-        throw 'Supervisors list already exists.'
     }
+    return userSupervisors.missedDrugEvents
 }
 
 async function updateThreshold(email, threshHold) {
