@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     email: {type: String,unique:true, required: true},
+    supervisorsList:[{'supervisorName':String,'supervisorEmail':String}],
     threshold:{type:Number,required: true},
     missedDrugEvents: [{'drug': String, 'missedCounter': Number}]
 
