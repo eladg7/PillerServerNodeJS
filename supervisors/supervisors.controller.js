@@ -6,7 +6,7 @@ const supervisorsService = require('./supervisors.service');
 router.post('/:email', initSupervisors);
 router.put('/threshold/:email/:threshold', updateThreshold);
 router.put('/counter/:email/:drugName', addMissedToCounterDrug);
-router.delete('/:email/:drugName', deleteDrugCounter);
+router.delete('/counter/:email/:drugName', deleteDrugCounter);
 router.delete('/:email', deleteSupervisorList);
 
 module.exports = router;
