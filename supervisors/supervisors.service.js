@@ -7,6 +7,7 @@ const Supervisors = db.Supervisors;
 module.exports = {
     initSupervisors,
     updateThreshold,
+    getThreshold,
     addMissedCounterToDrug,
     deleteDrugCounter,
     deleteSupervisorList
@@ -33,6 +34,15 @@ async function updateThreshold(email, threshHold) {
     userSupervisors.threshold = threshHold;
     userSupervisors.save();
 
+}
+
+async function getThreshold(email) {
+
+    var userSupervisors = await Supervisors.findOne({email: email});
+    if (!userSupervisors) {
+        throw 'Supervisors list does not exist.'
+    }
+    return userSupervisors.threshold
 }
 
 async function addMissedCounterToDrug(email, drugName) {
