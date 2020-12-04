@@ -6,6 +6,8 @@ const Supervisors = db.Supervisors;
 
 module.exports = {
     getSupervisors,
+    addSupervisor,
+    deleteSupervisor,
     updateThreshold,
     getThreshold,
     addMissedCounterToDrug,
@@ -18,10 +20,60 @@ async function getSupervisors(email) {
 
     var userSupervisors = await Supervisors.findOne({email: email});
     if (!userSupervisors) {
-        userSupervisors = new Supervisors({email: email, missedDrugEvents: [], threshold: 3})
+        userSupervisors = new Supervisors(
+            {email: email, supervisorsList: [], missedDrugEvents: [], threshold: 3})
         await userSupervisors.save();
     }
-    return userSupervisors.missedDrugEvents
+    return {'supervisorsList': userSupervisors.supervisorsList}
+}
+
+async function updateSupervisor(email,supervisorName,supervisorEmail) {
+
+    var userSupervisors = await Supervisors.findOne({email: email});
+    if (!userSupervisors) {
+        throw 'Supervisor list does not exist.'
+    }
+    const supervisors=userSupervisors.supervisorsList;
+    for (var i = 0; i < supervisors.length; i++) {
+        if (supervisors[i].supervisorEmail === supervisorEmail) {
+           supervisors[i].supervisorName=supervisorName;
+           supervisors[i].supervisorEmail=supervisorEmail
+            userSupervisors.save();
+           break;
+        }
+    }
+}
+
+async function addSupervisor(email,supervisorName,supervisorEmail) {
+
+    var userSupervisors = await Supervisors.findOne({email: email});
+    if (!userSupervisors) {
+        throw 'Supervisor list does not exist.'
+    }
+    const supervisors=userSupervisors.supervisorsList;
+    for (var i = 0; i < supervisors.length; i++) {
+        if (supervisors[i].supervisorEmail === supervisorEmail) {
+            throw 'Supervisor already exists.'
+        }
+    }
+    supervisors.push({'supervisorName':supervisorName,'supervisorEmail':supervisorEmail});
+    userSupervisors.save()
+}
+
+async function deleteSupervisor(email,supervisorEmail) {
+
+    var userSupervisors = await Supervisors.findOne({email: email});
+    if (!userSupervisors) {
+        throw 'Supervisor list does not exist.'
+    }
+    const supervisors=userSupervisors.supervisorsList;
+    for (var i = 0; i < supervisors.length; i++) {
+        if (supervisors[i].supervisorEmail === supervisorEmail) {
+            supervisors.splice(i, 1);
+            userSupervisors.save();
+            break;
+        }
+    }
 }
 
 async function updateThreshold(email, threshHold) {
@@ -41,7 +93,7 @@ async function getThreshold(email) {
     if (!userSupervisors) {
         throw 'Supervisors list does not exist.'
     }
-    return userSupervisors.threshold
+    return {'threshold':userSupervisors.threshold}
 }
 
 async function addMissedCounterToDrug(email, drugName) {
@@ -74,7 +126,7 @@ async function addMissedCounterToDrug(email, drugName) {
     }
     userSupervisors.save();
 
-    return isNotify
+    return {'isNotifySupervisors:':isNotify}
 }
 
 
