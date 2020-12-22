@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const User = db.User;
 const passwordGenerator = require('generate-password');
-const sendMail = require('_helpers/mailManager');
+const sendMailHTML = require('_helpers/mailManager');
 
 const resetPasswordLength = 7;
 
@@ -39,7 +39,8 @@ async function emailResetPassword(email) {
     //  save hashed password
     user.password = bcrypt.hashSync(newPassword, 10);
     await user.save();
-    sendMail([user.email], 'Password Reset', 'Your password was reset, your new password is: ' + newPassword)
+    sendMailHTML([user.email], 'Password Reset For Piller',
+        "<p>Your password was reset in Piller, your new password is:<br>" + newPassword+"</p>")
 }
 
 

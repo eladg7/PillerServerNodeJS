@@ -5,6 +5,7 @@ const supervisorsService = require('./supervisors.service');
 // routes
 router.get('/:email', getSupervisors);
 router.post('/:email/:supervisorName/:supervisorEmail', addSupervisor);
+router.get('/confirmation/:email/:supervisorName/:supervisorEmail', updateConfirmation);
 router.delete('/:email/:supervisorEmail', deleteSupervisor);
 
 router.put('/threshold/:email/:threshold', updateThreshold);
@@ -35,6 +36,14 @@ function addSupervisor(req, res, next) {
 function deleteSupervisor(req, res, next) {
     supervisorsService.deleteSupervisor(req.params.email, req.params.supervisorEmail)
         .then(() => res.json({}))
+        .catch(err => next(err));
+}
+
+function updateConfirmation(req, res, next) {
+    supervisorsService.updateConfirmation(req.params.email,
+        req.params.supervisorName, req.params.supervisorEmail)
+        .then(message => message ? res.status(200).json('Confirmation succeeded!')
+            : res.status(400).json({}))
         .catch(err => next(err));
 }
 

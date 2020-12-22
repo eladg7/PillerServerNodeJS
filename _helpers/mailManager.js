@@ -7,13 +7,12 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-
-function sendMail(to, subject, text) {
+function sendMailHTML(to,subject,htmlText){
     const mailOptions = {
         from: 'piller.inc1@gmail.com',
         to: to.join(),
         subject: subject,
-        text: text
+        html: htmlText
     }
 
     transporter.sendMail(mailOptions, function (error, info) {
@@ -26,5 +25,6 @@ function sendMail(to, subject, text) {
     })
 }
 
-module.exports = sendMail;
+
+module.exports = sendMailHTML;
 
