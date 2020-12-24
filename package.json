@@ -22,7 +22,10 @@
         "mongodb": "^3.5.9",
         "mongoose": "^5.9.21",
         "nodemailer": "^6.4.16",
-        "rootpath": "^0.1.2"
+        "request": "^2.88.2",
+        "request-promise": "^4.2.6",
+        "rootpath": "^0.1.2",
+        "xml2js": "^0.4.23"
     },
     "devDependencies": {
         "nodemon": "^2.0.4"
