@@ -5,7 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('_helpers/jwt');
 const errorHandler = require('_helpers/error-handler');
-const consts =require('_helpers/consts');
+const consts = require('_helpers/consts');
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -19,6 +19,7 @@ app.use('/user', require('./user/user.controller'));
 app.use('/calendar', require('./calendar/calendar.controller'));
 app.use('/profile', require('./profile/profile.controller'));
 app.use('/supervisors', require('./supervisors/supervisors.controller'));
+app.use('/drugApiCalls', require('./drug_api_calls/drug_api_calls.controller'));
 
 
 // global error handler
