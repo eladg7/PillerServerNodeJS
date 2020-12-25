@@ -20,10 +20,11 @@ async function getByEmailAndName(email, name) {
     } else {
         const drugList = calendar.drugList;
         for (let i = 0; i < drugList.length; i++) {
-            const drug = drugList[i].drug;
+            const drug = drugList[i].name;
+            const rxcui = drugList[i].rxcui;
             const eventId = drugList[i].event_id;
             const drugInfo = await Occurrence.findById(eventId);
-            drugInfoList.push({"drug": drug, "drug_info": drugInfo});
+            drugInfoList.push({"name": drug, "rxcui": rxcui, "drug_info": drugInfo});
         }
     }
     return {"drug_info_list": drugInfoList};
@@ -33,7 +34,8 @@ async function getByEmailAndName(email, name) {
 /*
 {
     "drug_info":{
-        "drug":"acamol",
+        "name":"acamol",
+        "rxcui":12345,
         "repeat_start":"1606302569494",
         "repeat_year":-1,
         "repeat_month":-1,
@@ -58,9 +60,10 @@ async function add_drug(email, name, userParam) {
     });
     await occurrence.save();
     const event_id = await occurrence.id;
-    const drug_name = new_drug_info.drug;
+    const drug_name = new_drug_info.name;
+    const drug_rxcui = new_drug_info.rxcui;
 
-    var new_drug = {'drug': drug_name, 'event_id': event_id}
+    var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
     drugList.push(new_drug);
     await calendar.save();
 }
@@ -79,7 +82,7 @@ async function delete_drug(email, name, userParam) {
     const new_drug_info = userParam.drug_info;
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
-        if (drugList[i].drug === new_drug_info.drug) {
+        if (drugList[i].name === new_drug_info.name) {
             const event_id = drugList[i].event_id;
             await Occurrence.findByIdAndDelete(event_id);
             drugList.splice(i, 1);
