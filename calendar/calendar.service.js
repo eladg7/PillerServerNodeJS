@@ -33,23 +33,20 @@ async function getByEmailAndName(email, name) {
 
 /*
 {
-    "drug_info":{
-        "name":"acamol",
-        "rxcui":12345,
-        "repeat_start":"1606302569494",
-        "repeat_year":-1,
-        "repeat_month":-1,
-        "repeat_day":-1,
-        "repeat_week":-1,
-        "repeat_weekday":2
-    }
+    "name":"acamol",
+    "rxcui":12345,
+    "repeat_start":"1606302569494",
+    "repeat_year":-1,
+    "repeat_month":-1,
+    "repeat_day":-1,
+    "repeat_week":-1,
+    "repeat_weekday":2
 }
  */
 
-async function add_drug(email, name, userParam) {
+async function add_drug(email, name, new_drug_info) {
     const calendar = await Calendar.findOne({email: email, name: name});
     if (!calendar) throw 'User\'s calendar not found';
-    const new_drug_info = userParam.drug_info;
     const drugList = calendar.drugList;
     // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
     // const seconds = date.getTime()
@@ -60,7 +57,7 @@ async function add_drug(email, name, userParam) {
     });
     await occurrence.save();
     const event_id = await occurrence.id;
-    const drug_name = new_drug_info.name;
+    const drug_name = new_drug_info.drug_name;
     const drug_rxcui = new_drug_info.rxcui;
 
     var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
