@@ -44,8 +44,8 @@ async function getByEmailAndName(email, name) {
 }
  */
 
-async function add_drug(email, name, new_drug_info) {
-    const calendar = await Calendar.findOne({email: email, name: name});
+async function add_drug(email, profileName, new_drug_info) {
+    const calendar = await Calendar.findOne({email: email, name: profileName});
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
@@ -57,7 +57,7 @@ async function add_drug(email, name, new_drug_info) {
     });
     await occurrence.save();
     const event_id = await occurrence.id;
-    const drug_name = new_drug_info.drug_name;
+    const drug_name = new_drug_info.name;
     const drug_rxcui = new_drug_info.rxcui;
 
     var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
