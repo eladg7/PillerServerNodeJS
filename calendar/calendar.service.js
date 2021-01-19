@@ -36,10 +36,10 @@ async function getByEmailAndName(email, name) {
     "name":"acamol",
     "rxcui":12345,
     "repeat_start":"1606302569494",
-    "repeat_year":-1,
-    "repeat_month":-1,
-    "repeat_day":-1,
-    "repeat_week":-1,
+    "repeat_year":0,
+    "repeat_month":0,
+    "repeat_day":0,
+    "repeat_week":1,
     "repeat_weekday":2
 }
  */
