@@ -7,6 +7,7 @@ module.exports = {
     add_drug,
     delete_drug,
     update_drug,
+    deleteFutureOccurrencesOfDrugByUser,
     delete: _delete
 };
 
@@ -30,6 +31,21 @@ async function getByEmailAndName(email, name) {
     return {"drug_info_list": drugInfoList};
 }
 
+async function deleteFutureOccurrencesOfDrugByUser(email, name, rxcui, repeat_end) {
+    const calendar = await Calendar.findOne({email: email, name: name});
+    if (!calendar) throw 'User\'s calendar not found';
+    const drugList = calendar.drugList;
+    for (let i = 0; i < drugList.length; i++) {
+        if (drugList[i].rxcui === rxcui) {
+            const event_id = drugList[i].event_id;
+            const occurrence = await Occurrence.findById(event_id);
+            occurrence.repeat_end = repeat_end;
+            occurrence.save()
+            return true;
+        }
+    }
+    return false;
+}
 
 /*
 {
@@ -53,7 +69,8 @@ async function add_drug(email, profileName, new_drug_info) {
     const occurrence = new Occurrence({
         repeat_start: new_drug_info.repeat_start, repeat_year: new_drug_info.repeat_year,
         repeat_month: new_drug_info.repeat_month, repeat_day: new_drug_info.repeat_day,
-        repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday
+        repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday,
+        repeat_end: new_drug_info.repeat_end
     });
     await occurrence.save();
     const event_id = await occurrence.id;
