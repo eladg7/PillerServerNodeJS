@@ -48,6 +48,8 @@ async function add_drug(email, profileName, new_drug_info) {
     const calendar = await Calendar.findOne({email: email, name: profileName});
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
+    if(doesDrugExists(drugList,new_drug_info.rxcui)) throw 'Drug already exists in calendar.';
+
     // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
     // const seconds = date.getTime()
     const occurrence = new Occurrence({
@@ -60,9 +62,20 @@ async function add_drug(email, profileName, new_drug_info) {
     const drug_name = new_drug_info.name;
     const drug_rxcui = new_drug_info.rxcui;
 
+
     var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
     drugList.push(new_drug);
     await calendar.save();
+}
+function doesDrugExists(drugList,rxcui){
+    var result=false;
+    for(var i=0;i<drugList.length;i++){
+        if(drugList[i].rxcui == rxcui){
+            result=true;
+            break;
+        }
+    }
+    return result;
 }
 
 async function update_drug(email, name, userParam) {
