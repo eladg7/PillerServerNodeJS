@@ -9,7 +9,23 @@ parser.on('error', function (err) {
 
 module.exports = {
     findDrugByName,
+    findInteractions
 };
+
+async function findInteractions(newRxcui,drugList){
+    const rxcuisJoined= drugList.split('&');
+    rxcuisJoined.push(newRxcui);
+    const options = {
+        uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis='+rxcuisJoined.join('+'),
+        // qs: {
+        //     rxcuis: rxcuisJoined
+        // },
+        json: true
+    };
+    const result = await requestPromise(options);
+    return parseInteraction(result,newRxcui);
+
+}
 
 async function findDrugByName(drugName) {
     const options = {
@@ -20,7 +36,6 @@ async function findDrugByName(drugName) {
         json: false
     };
 
-    //  send get request with the given drug name
     const result = await requestPromise(options);
     let parsedResult = null;
     await parser.parseString(result, function (err, result) {
@@ -30,6 +45,24 @@ async function findDrugByName(drugName) {
         parsedResult = result;
     });
     return parseDrugsXML(parsedResult);
+}
+
+
+function parseInteraction(interactionResult,newRxcui){
+    var result=[];
+    var interactionsType=interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
+    for(var i=0;i<interactionsType.length;i++){
+        //notify interaction with the new drug only
+        if(interactionsType[i].minConcept[0].rxcui == newRxcui || interactionsType[i].minConcept[1].rxcui == newRxcui){
+            // one of the interations are the new added drug
+            result.push({interaction:[  {rxcui: interactionsType[i].minConcept[0].rxcui, name: interactionsType[i].minConcept[0].name},
+                            {rxcui: interactionsType[i].minConcept[1].rxcui, name: interactionsType[i].minConcept[1].name}],
+                        description:interactionsType[i].interactionPair[0].description })
+        }
+
+    }
+    return result;
+
 }
 
 function parseDrugsXML(drugXML) {
