@@ -1,6 +1,7 @@
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser();
 const requestPromise = require('request-promise');
+const calendarService = require('../calendar/calendar.service');
 
 parser.on('error', function (err) {
     console.log('Parser error', err);
@@ -12,18 +13,25 @@ module.exports = {
     findInteractions
 };
 
-async function findInteractions(newRxcui,drugList){
-    const rxcuisJoined= drugList.split('&');
+async function findInteractions(email, profileName, newRxcui) {
+    const drugList = (await calendarService.getByEmailAndName(email, profileName)).drug_info_list;
+    var rxcuisJoined = [];
+    //push all current drug rxcui
+    for (let i = 0; i < drugList.length; i++) {
+        rxcuisJoined.push(drugList[i].rxcui);
+    }
+    //push new rxcui
     rxcuisJoined.push(newRxcui);
-    const options = {
-        uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis='+rxcuisJoined.join('+'),
-        // qs: {
-        //     rxcuis: rxcuisJoined
-        // },
-        json: true
-    };
-    const result = await requestPromise(options);
-    return parseInteraction(result,newRxcui);
+    var parsedInter = []
+    if (rxcuisJoined.length > 1) {
+        const options = {
+            uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'),
+            json: true
+        };
+        const result = await requestPromise(options);
+        parsedInter = parseInteraction(result, newRxcui);
+    }
+    return parsedInter;
 
 }
 
@@ -48,16 +56,28 @@ async function findDrugByName(drugName) {
 }
 
 
-function parseInteraction(interactionResult,newRxcui){
-    var result=[];
-    var interactionsType=interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
-    for(var i=0;i<interactionsType.length;i++){
+function parseInteraction(interactionResult, newRxcui) {
+    var result = [];
+    var interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
+    for (var i = 0; i < interactionsType.length; i++) {
         //notify interaction with the new drug only
-        if(interactionsType[i].minConcept[0].rxcui == newRxcui || interactionsType[i].minConcept[1].rxcui == newRxcui){
-            // one of the interations are the new added drug
-            result.push({interaction:[  {rxcui: interactionsType[i].minConcept[0].rxcui, name: interactionsType[i].minConcept[0].name},
-                            {rxcui: interactionsType[i].minConcept[1].rxcui, name: interactionsType[i].minConcept[1].name}],
-                        description:interactionsType[i].interactionPair[0].description })
+        if (interactionsType[i].minConcept[0].rxcui == newRxcui) {
+            // push the first interaction drug
+            result.push({
+                interaction: {
+                    rxcui: interactionsType[i].minConcept[1].rxcui, name: interactionsType[i].minConcept[1].name
+                },
+                description: interactionsType[i].interactionPair[0].description
+            })
+        }
+        else if (interactionsType[i].minConcept[1].rxcui == newRxcui) {
+            //push the second interaction drug
+            result.push({
+                interaction: {
+                    rxcui: interactionsType[i].minConcept[0].rxcui, name: interactionsType[i].minConcept[0].name
+                },
+                description: interactionsType[i].interactionPair[0].description
+            })
         }
 
     }
