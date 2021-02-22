@@ -24,8 +24,9 @@ function update(req, res, next) {
         .catch(err => next(err));
 }
 
+//  req.query["rxcui"] means that it'll be in the end of the url with ?rxcui=12345
 function delete_drug(req, res, next) {
-    calendarService.delete_drug(req.params.email, req.params.name, req.body)
+    calendarService.delete_drug(req.params.email, req.params.name, req.query["rxcui"])
         .then(() => res.json({}))
         .catch(err => next(err));
 }
