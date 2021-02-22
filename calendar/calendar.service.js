@@ -73,13 +73,12 @@ async function update_drug(email, name, userParam) {
     await add_drug(email, name, userParam);
 }
 
-async function delete_drug(email, name, userParam) {
+async function delete_drug(email, name, rxcui) {
     const calendar = await Calendar.findOne({email: email, name: name});
     if (!calendar) throw 'User\'s calendar not found';
-    const new_drug_info = userParam.drug_info;
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
-        if (drugList[i].name === new_drug_info.name) {
+        if (drugList[i].rxcui === rxcui) {
             const event_id = drugList[i].event_id;
             await Occurrence.findByIdAndDelete(event_id);
             drugList.splice(i, 1);
