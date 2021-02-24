@@ -4,7 +4,7 @@ const Occurrence = db.Occurrence;
 
 module.exports = {
     getByEmailAndName,
-    add_drug,
+    add_drug: add_new_drug,
     delete_drug,
     update_drug,
     deleteFutureOccurrencesOfDrugByUser,
@@ -59,31 +59,15 @@ async function deleteFutureOccurrencesOfDrugByUser(email, name, rxcui, repeat_en
     "repeat_weekday":2
 }
  */
-
-async function add_drug(email, profileName, new_drug_info) {
+async function add_new_drug(email, profileName, new_drug_info) {
     const calendar = await Calendar.findOne({email: email, name: profileName});
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     if(doesDrugExists(drugList,new_drug_info.rxcui)) throw 'Drug already exists in calendar.';
-
-    // const date = new Date(new_drug_info.date_intake + " " + new_drug_info.time_intake);
-    // const seconds = date.getTime()
-    const occurrence = new Occurrence({
-        repeat_start: new_drug_info.repeat_start, repeat_year: new_drug_info.repeat_year,
-        repeat_month: new_drug_info.repeat_month, repeat_day: new_drug_info.repeat_day,
-        repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday,
-        repeat_end: new_drug_info.repeat_end
-    });
-    await occurrence.save();
-    const event_id = await occurrence.id;
-    const drug_name = new_drug_info.name;
-    const drug_rxcui = new_drug_info.rxcui;
-
-
-    var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
-    drugList.push(new_drug);
-    await calendar.save();
+    await add_drug(calendar,new_drug_info)
 }
+
+
 function doesDrugExists(drugList,rxcui){
     var result=false;
     for(var i=0;i<drugList.length;i++){
@@ -95,12 +79,25 @@ function doesDrugExists(drugList,rxcui){
     return result;
 }
 
-async function update_drug(email, name, userParam) {
-    const calendar = await Calendar.findOne({email: email, name: name});
-    if (!calendar) throw 'User\'s calendar not found';
-    //  in order to update we just delete the original and then insert a new one
-    await delete_drug(email, name, userParam);
-    await add_drug(email, name, userParam);
+async function add_drug(calendar,new_drug_info){
+    const occurrence = new Occurrence({
+        repeat_start: new_drug_info.repeat_start, repeat_year: new_drug_info.repeat_year,
+        repeat_month: new_drug_info.repeat_month, repeat_day: new_drug_info.repeat_day,
+        repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday,
+        repeat_end: new_drug_info.repeat_end
+    });
+    await occurrence.save();
+    const event_id = await occurrence.id;
+    const drug_name = new_drug_info.name;
+    const drug_rxcui = new_drug_info.rxcui;
+    var new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id}
+    calendar.drugList.push(new_drug);
+    await calendar.save();
+}
+
+async function update_drug(email, name, drug_info) {
+    const calendar = await delete_drug(email, name, drug_info.rxcui);
+    await add_drug(calendar, drug_info);
 }
 
 async function delete_drug(email, name, rxcui) {
@@ -108,7 +105,7 @@ async function delete_drug(email, name, rxcui) {
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
-        if (drugList[i].rxcui === rxcui) {
+        if (drugList[i].rxcui == rxcui) { //has to be ==, not the same type
             const event_id = drugList[i].event_id;
             await Occurrence.findByIdAndDelete(event_id);
             drugList.splice(i, 1);
@@ -116,6 +113,7 @@ async function delete_drug(email, name, rxcui) {
         }
     }
     await calendar.save();
+    return calendar;
 }
 
 async function _delete(email) {
