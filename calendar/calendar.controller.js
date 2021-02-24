@@ -6,7 +6,7 @@ const calendarService = require('./calendar.service');
 router.post('/addDrug/:email/:name', add_drug);
 router.delete('/deleteDrug/:email/:name', delete_drug);
 router.get('/:email/:name', getByEmailAndName);
-router.put('/:email/:name', update);
+router.post('/updateDrug/:email/:name', update_drug);
 router.delete('/:email', _delete);
 router.put('/deleteFutureOccurrencesOfDrugByUser/:email/:name', deleteFutureOccurrencesOfDrugByUser);
 
@@ -25,7 +25,7 @@ function deleteFutureOccurrencesOfDrugByUser(req, res, next) {
         .catch(err => next(err));
 }
 
-function update(req, res, next) {
+function update_drug(req, res, next) {
     calendarService.update_drug(req.params.email, req.params.name, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
@@ -39,7 +39,7 @@ function delete_drug(req, res, next) {
 }
 
 function add_drug(req, res, next) {
-    calendarService.add_drug(req.params.email, req.params.name, req.body)
+    calendarService.add_new_drug(req.params.email, req.params.name, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
