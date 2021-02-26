@@ -4,7 +4,7 @@ const Occurrence = db.Occurrence;
 
 module.exports = {
     getByEmailAndName,
-    add_drug: add_new_drug,
+    add_new_drug,
     delete_drug,
     update_drug,
     deleteFutureOccurrencesOfDrugByUser,
