@@ -27,20 +27,20 @@ function deleteFutureOccurrencesOfDrugByUser(req, res, next) {
 
 function update_drug(req, res, next) {
     calendarService.update_drug(req.params.email, req.params.name, req.body)
-        .then(() => res.json({}))
+        .then(event_id_arr => res.json(event_id_arr))
         .catch(err => next(err));
 }
 
 //  req.query["rxcui"] means that it'll be in the end of the url with ?rxcui=12345
 function delete_drug(req, res, next) {
     calendarService.delete_drug(req.params.email, req.params.name, req.query["rxcui"])
-        .then(() => res.json({}))
+        .then(event_id => res.json(event_id))
         .catch(err => next(err));
 }
 
 function add_drug(req, res, next) {
     calendarService.add_new_drug(req.params.email, req.params.name, req.body)
-        .then(() => res.json({}))
+        .then(event_id => res.json(event_id))
         .catch(err => next(err));
 }
 
