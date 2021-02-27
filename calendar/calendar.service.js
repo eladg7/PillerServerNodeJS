@@ -63,21 +63,20 @@ async function add_new_drug(email, profileName, new_drug_info) {
     if (!calendar) throw 'User\'s calendar not found';
     //const drugList = calendar.drugList;
     //if (doesDrugExists(drugList, new_drug_info.rxcui)) throw 'Drug already exists in calendar.';
-    const current_event_id = await add_drug(calendar, new_drug_info)
-    return {event_id: current_event_id}
+    return await add_drug(calendar, new_drug_info)
 }
 
 
-function doesDrugExists(drugList, rxcui, drug_name) {
-    let result = false;
-    for (let i = 0; i < drugList.length; i++) {
-        if (drugList[i].rxcui == rxcui && drug_name === drugList[i].name) {
-            result = true;
-            break;
-        }
-    }
-    return result;
-}
+// function doesDrugExists(drugList, rxcui, drug_name) {
+//     let result = false;
+//     for (let i = 0; i < drugList.length; i++) {
+//         if (drugList[i].rxcui == rxcui && drug_name === drugList[i].name) {
+//             result = true;
+//             break;
+//         }
+//     }
+//     return result;
+// }
 
 async function add_drug(calendar, new_drug_info) {
     const occurrence = new Occurrence({
@@ -98,8 +97,8 @@ async function add_drug(calendar, new_drug_info) {
 
 async function update_drug(email, name, event_id, drug_info) {
     const calendar = await delete_drug(email, name, event_id, true);
-    const current_event_id = await add_drug(calendar, drug_info);
-    return {old_event_id: event_id, current_event_id: current_event_id}
+    return await add_drug(calendar, drug_info);
+
 }
 
 async function delete_drug(email, name, event_id, returnCalendar = false) {
