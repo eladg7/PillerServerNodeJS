@@ -6,7 +6,7 @@ const calendarService = require('./calendar.service');
 router.post('/addDrug/:email/:name', add_drug);
 router.delete('/deleteDrug/:email/:name', delete_drug);
 router.get('/:email/:name', getByEmailAndName);
-router.post('/updateDrug/:email/:name', update_drug);
+router.post('/updateDrug/:email/:name/:event_id', update_drug);
 router.delete('/:email', _delete);
 router.put('/deleteFutureOccurrencesOfDrugByUser/:email/:name', deleteFutureOccurrencesOfDrugByUser);
 
@@ -20,21 +20,21 @@ function getByEmailAndName(req, res, next) {
 }
 
 function deleteFutureOccurrencesOfDrugByUser(req, res, next) {
-    calendarService.deleteFutureOccurrencesOfDrugByUser(req.params.email, req.params.name, req.query["rxcui"], req.query["repeat_end"])
+    calendarService.deleteFutureOccurrencesOfDrugByUser(req.params.email, req.params.name, req.query["event_id"], req.query["repeat_end"])
         .then(() => res.json({}))
         .catch(err => next(err));
 }
 
 function update_drug(req, res, next) {
-    calendarService.update_drug(req.params.email, req.params.name, req.body)
+    calendarService.update_drug(req.params.email, req.params.name,req.params.event_id, req.body)
         .then(event_id_arr => res.json(event_id_arr))
         .catch(err => next(err));
 }
 
-//  req.query["rxcui"] means that it'll be in the end of the url with ?rxcui=12345
+//  req.query["event_id"] means that it'll be in the end of the url with ?event_id=....
 function delete_drug(req, res, next) {
-    calendarService.delete_drug(req.params.email, req.params.name, req.query["rxcui"])
-        .then(event_id => res.json(event_id))
+    calendarService.delete_drug(req.params.email, req.params.name, req.query["event_id"])
+        .then(() => res.json({}))
         .catch(err => next(err));
 }
 
