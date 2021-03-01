@@ -10,8 +10,31 @@ parser.on('error', function (err) {
 
 module.exports = {
     findDrugByName,
-    findInteractions
+    findInteractions,
+    getDrugImage
 };
+
+async function getDrugImage(rxcui) {
+    let imageSrc = "";
+    if (rxcui !== "0") {
+        const options = {
+            uri: 'https://rximage.nlm.nih.gov/api/rximage/1/rxnav?rxcui=' + rxcui,
+            json: true
+        };
+        const result = await requestPromise(options);
+        imageSrc = getImageFromResult(result);
+    }
+
+    return {imageSrc: imageSrc};
+}
+
+function getImageFromResult(result) {
+    let imageSrc = "";
+    if (result != null && result.replyStatus.success && result.nlmRxImages.length > 0) {
+        imageSrc = result.nlmRxImages[0].imageUrl;
+    }
+    return imageSrc;
+}
 
 async function findInteractions(email, profileName, newRxcui) {
     const drugList = (await calendarService.getByEmailAndName(email, profileName)).drug_info_list;
@@ -31,8 +54,8 @@ async function findInteractions(email, profileName, newRxcui) {
         const result = await requestPromise(options);
         parsedInter = parseInteraction(result, newRxcui);
     }
-    return parsedInter;
 
+    return parsedInter;
 }
 
 async function findDrugByName(drugName) {
@@ -69,8 +92,7 @@ function parseInteraction(interactionResult, newRxcui) {
                 },
                 description: interactionsType[i].interactionPair[0].description
             })
-        }
-        else if (interactionsType[i].minConcept[1].rxcui == newRxcui) {
+        } else if (interactionsType[i].minConcept[1].rxcui == newRxcui) {
             //push the second interaction drug
             result.push({
                 interaction: {
