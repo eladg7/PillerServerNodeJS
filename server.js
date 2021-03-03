@@ -20,6 +20,7 @@ app.use('/calendar', require('./calendar/calendar.controller'));
 app.use('/profile', require('./profile/profile.controller'));
 app.use('/supervisors', require('./supervisors/supervisors.controller'));
 app.use('/drugApiCalls', require('./drug_api_calls/drug_api_calls.controller'));
+app.use('/drugIntakes', require('./intake_dates/intake_dates.controller.'));
 
 
 // global error handler
