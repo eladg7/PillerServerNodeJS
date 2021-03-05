@@ -1,4 +1,5 @@
 const db = require('_helpers/db');
+const {getAllIntakes} = require("../intake_dates/intake_dates.service");
 const Calendar = db.Calendar;
 const Occurrence = db.Occurrence;
 const IntakeDates = db.IntakeDates;
@@ -27,12 +28,14 @@ async function getByEmailAndName(email, name) {
             const eventId = drugList[i].event_id;
             const takenId = drugList[i].taken_id;
             const drugInfo = await Occurrence.findById(eventId);
+            const intakes = await getAllIntakes(takenId);
             drugInfoList.push({
                 "name": drug,
                 "rxcui": rxcui,
                 "event_id": eventId,
                 "drug_info": drugInfo,
-                "taken_id": takenId
+                "taken_id": takenId,
+                "intakes": intakes
             });
         }
     }
@@ -103,7 +106,7 @@ async function add_drug(calendar, new_drug_info) {
     const new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id, 'taken_id': taken_id};
     calendar.drugList.push(new_drug);
     await calendar.save();
-    return event_id;
+    return {event_id: event_id, taken_id: taken_id};
 }
 
 async function update_drug(email, name, event_id, drug_info) {
