@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const jwt = require('_helpers/jwt');
 const errorHandler = require('_helpers/error-handler');
 const consts = require('_helpers/consts');
+const cron = require('node-cron');
+const {mailAllSupervisors} = require("./supervisors/supervisors.mail.service");
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -31,4 +33,10 @@ app.use(errorHandler);
 const port = consts.serverConfig['PORT'];
 const server = app.listen(port, consts.serverConfig['IP'], function () {
     console.log('Server listening on port ' + port);
+    //  explanation about the fields: https://www.npmjs.com/package/node-cron
+    cron.schedule('0 0 19 * * *', () => {
+        mailAllSupervisors()
+            .then()
+            .catch(err => console.log(err));
+    });
 });
