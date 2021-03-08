@@ -7,7 +7,7 @@ router.post('/addDrug/:email/:name', add_drug);
 router.delete('/deleteDrug/:email/:name', delete_drug);
 router.get('/:email/:name', getByEmailAndName);
 router.post('/updateDrug/:email/:name/:event_id', update_drug);
-router.delete('/:email', _delete);
+router.delete('/:email/:name', _delete);
 router.put('/deleteFutureOccurrencesOfDrugByUser/:email/:name', deleteFutureOccurrencesOfDrugByUser);
 
 module.exports = router;
@@ -45,7 +45,7 @@ function add_drug(req, res, next) {
 }
 
 function _delete(req, res, next) {
-    calendarService.delete(req.params.email)
+    calendarService.delete(req.params.email, req.params.name)
         .then(() => res.json({}))
         .catch(err => next(err));
 }

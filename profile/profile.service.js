@@ -2,6 +2,9 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
+const calendarService = require('../calendar/calendar.service');
+
+
 const Profile = db.Profile;
 
 module.exports = {
@@ -24,6 +27,7 @@ async function initProfileList(email, profileName) {
 async function getAllProfiles(email) {
     var profileList = [];
     var userProfiles = await Profile.findOne({email: email})
+    profileList.push(userProfiles.mainProfile)
     if (userProfiles) {
         const profiles = userProfiles.secondaryProfileList;
         for (var i = 0; i < profiles.length; i++) {
@@ -60,6 +64,7 @@ async function deleteProfile(email, name) {
         for (var i = 0; i < profileList.length; i++) {
             if (profileList[i] === name) {
                 profileList.splice(i, 1);
+                await calendarService.delete(email,name)
                 break;
             }
         }
@@ -69,5 +74,15 @@ async function deleteProfile(email, name) {
 }
 
 async function deleteAllProfiles(email) {
+    var userProfiles = await Profile.findOne({email: email})
+    if (userProfiles) {
+        await calendarService.delete(email,userProfiles.mainProfile)
+        var profileList = userProfiles.secondaryProfileList
+        for (let i = 0; i < profileList.length; i++) {
+            await calendarService.delete(email, profileList[i].name)
+        }
+        userProfiles.save()
+
+    }
     await Profile.deleteOne({email: email});
 }
