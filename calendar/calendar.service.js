@@ -3,6 +3,8 @@ const {getAllIntakes} = require("../intake_dates/intake_dates.service");
 const Calendar = db.Calendar;
 const Occurrence = db.Occurrence;
 const IntakeDates = db.IntakeDates;
+const User = db.User;
+
 
 module.exports = {
     getByEmailAndName,
@@ -15,6 +17,9 @@ module.exports = {
 
 async function getByEmailAndName(email, name) {
     var drugInfoList = [];
+    // const user = await User.findOne({email: email});
+    // // validate
+    // if (!user) throw 'User ' + email + ' not found';
     var calendar = await Calendar.findOne({email: email, name: name})
 
     if (!calendar) {
@@ -28,6 +33,7 @@ async function getByEmailAndName(email, name) {
             const eventId = drugList[i].event_id;
             const takenId = drugList[i].taken_id;
             const drugInfo = await Occurrence.findById(eventId);
+
             const intakes = await getAllIntakes(takenId);
             drugInfoList.push({
                 "name": drug,
@@ -133,7 +139,7 @@ async function delete_drug(email, name, event_id, returnCalendar = false) {
     }
 }
 
-async function _delete(email) {
+async function _delete(email,name) {
     const calendar = await Calendar.findOne({email: email, name: name});
     // validate
     if (!calendar) throw 'User\'s calendar not found';
@@ -145,5 +151,5 @@ async function _delete(email) {
         await IntakeDates.findByIdAndDelete(drugList[i].taken_id);
     }
 
-    await Calendar.deleteOne({email: email});
+    await Calendar.deleteOne({email: email, name: name});
 }

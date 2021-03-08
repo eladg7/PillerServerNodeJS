@@ -2,6 +2,11 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
+const superviseService = require('../supervisors/supervisors.service');
+
+const profileService = require('../profile/profile.service');
+
+
 const User = db.User;
 const passwordGenerator = require('generate-password');
 const sendMailHTML = require('_helpers/mailManager');
@@ -102,6 +107,11 @@ async function update(email, userParam) {
 }
 
 async function _delete(email) {
-    //  todo delete everything that the user has - calendar, supervisors etc.
+    //delete profiles (calenders + occurence+intakedate)
+    profileService.deleteAllProfiles(email)
+    //delete supervisors
+    superviseService.deleteSupervisorList(email)
+
+
     await User.deleteOne({email: email});
 }
