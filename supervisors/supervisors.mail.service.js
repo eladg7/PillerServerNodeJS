@@ -14,8 +14,9 @@ module.exports = {
 };
 
 async function mailAllSupervisors() {
+    //  get every user
     await User.find({}).stream()
-        .on('data', async function (user, err) {
+        .on('data', async function (user, _) {
             const threshold = (await getThreshold(user.email)).threshold;
             if (threshold > 0) {
                 const supervisors = await getConfirmedSupervisors(user.email);
@@ -33,13 +34,9 @@ async function mailAllSupervisors() {
 
 async function sendMailAboutUser(drugList, user, supervisors, threshold) {
     for (let i = 0; i < drugList.length; i++) {
-        const intakes = await getAllIntakes(drugList[i].taken_id);
+        let intakes = await getAllIntakes(drugList[i].taken_id);
 
-        //  sort the intakes by date
-        intakes.sort(function (a, b) {
-            return a.date - b.date;
-        });
-
+        intakes = getRelevantDates(intakes);
         //  get the last elements
         const lastThresholdElements = intakes.slice(Math.max(intakes.length - threshold, 0));
         if (hasConsecutiveNotTaken(lastThresholdElements)) {
@@ -47,6 +44,17 @@ async function sendMailAboutUser(drugList, user, supervisors, threshold) {
             mailUser(user, drugList[i], threshold);
         }
     }
+}
+
+function getRelevantDates(intakes) {
+    //  sort the intakes by date
+    intakes.sort(function (a, b) {
+        return a.date - b.date;
+    });
+
+    const now = new Date().getTime();
+    //  leave only dates that are before now
+    return intakes.filter(intake => intake.date <= now);
 }
 
 function hasConsecutiveNotTaken(intakes) {

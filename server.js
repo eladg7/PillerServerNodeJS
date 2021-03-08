@@ -33,6 +33,8 @@ app.use(errorHandler);
 const port = consts.serverConfig['PORT'];
 const server = app.listen(port, consts.serverConfig['IP'], function () {
     console.log('Server listening on port ' + port);
+    //  set a task every dat at 19:00:00 that will send an email to every supervisor if the user didn't take
+    //  his medicine.
     //  explanation about the fields: https://www.npmjs.com/package/node-cron
     cron.schedule('0 0 19 * * *', () => {
         mailAllSupervisors()
