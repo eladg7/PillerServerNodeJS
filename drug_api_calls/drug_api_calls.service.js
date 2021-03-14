@@ -38,23 +38,26 @@ function getImageFromResult(result) {
 
 async function findInteractions(email, profileName, newRxcui) {
     const drugList = (await calendarService.getByEmailAndName(email, profileName)).drug_info_list;
-    var rxcuisJoined = [];
-    //push all current drug rxcui
-    for (let i = 0; i < drugList.length; i++) {
-        rxcuisJoined.push(drugList[i].rxcui);
+    let parsedInter = [];
+    if (newRxcui !== "0") {
+        const rxcuisJoined = [];
+        //  push new rxcui
+        rxcuisJoined.push(newRxcui);
+        //  push all current drug rxcui that aren't 0
+        for (let i = 0; i < drugList.length; i++) {
+            if (drugList[i].rxcui !== "0") {
+                rxcuisJoined.push(drugList[i].rxcui);
+            }
+        }
+        if (rxcuisJoined.length > 1) {
+            const options = {
+                uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'),
+                json: true
+            };
+            const result = await requestPromise(options);
+            parsedInter = parseInteraction(result, newRxcui);
+        }
     }
-    //push new rxcui
-    rxcuisJoined.push(newRxcui);
-    var parsedInter = []
-    if (rxcuisJoined.length > 1) {
-        const options = {
-            uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'),
-            json: true
-        };
-        const result = await requestPromise(options);
-        parsedInter = parseInteraction(result, newRxcui);
-    }
-
     return parsedInter;
 }
 
