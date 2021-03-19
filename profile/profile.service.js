@@ -58,17 +58,22 @@ async function addProfile(email, profileName) {
 
 
 async function deleteProfile(email, name) {
-    var userProfiles = await Profile.findOne({email: email})
+    var userProfiles = await Profile.findOne({email: email});
     if (userProfiles) {
-        var profileList = userProfiles.secondaryProfileList
+        var profileList = userProfiles.secondaryProfileList;
         for (var i = 0; i < profileList.length; i++) {
             if (profileList[i] === name) {
                 profileList.splice(i, 1);
-                await calendarService.delete(email,name)
+                try{
+                    // the profile may not have a calendar yet
+                    await calendarService.delete(email,name);
+                }catch (e) {
+                    console.error(e);
+                }
                 break;
             }
         }
-        userProfiles.save()
+        userProfiles.save();
 
     }
 }
