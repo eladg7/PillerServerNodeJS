@@ -28,24 +28,22 @@ async function getByEmailAndName(email, name) {
     } else {
         const drugList = calendar.drugList;
         for (let i = 0; i < drugList.length; i++) {
-            const drug = drugList[i].name;
-            const rxcui = drugList[i].rxcui;
             const eventId = drugList[i].event_id;
-            const takenId = drugList[i].taken_id;
             const drugInfo = await Occurrence.findById(eventId);
-
+            const takenId = drugList[i].taken_id;
             const intakes = await getAllIntakes(takenId);
+
+
             drugInfoList.push({
-                "name": drug,
-                "rxcui": rxcui,
-                "event_id": eventId,
-                "drug_info": drugInfo,
-                "taken_id": takenId,
-                "intakes": intakes
+                "name": drugList[i].name,
+                "rxcui": drugList[i].rxcui,
+                "occurrence": {"event_id": eventId, "drug_info": drugInfo},
+                "intake_dates":{"taken_id": takenId, "intakes": intakes}
             });
         }
     }
-    return {"drug_info_list": drugInfoList};
+    const calendarId=await calendar.id
+    return {"calendar_id":calendarId,"drug_info_list": drugInfoList};
 }
 
 async function deleteFutureOccurrencesOfDrugByUser(email, name, event_id, repeat_end) {
@@ -96,11 +94,12 @@ async function add_new_drug(email, profileName, new_drug_info) {
 // }
 
 async function add_drug(calendar, new_drug_info) {
+    const occurrenceObj=new_drug_info.occurrence
     const occurrence = new Occurrence({
-        repeat_start: new_drug_info.repeat_start, repeat_year: new_drug_info.repeat_year,
-        repeat_month: new_drug_info.repeat_month, repeat_day: new_drug_info.repeat_day,
-        repeat_week: new_drug_info.repeat_week, repeat_weekday: new_drug_info.repeat_weekday,
-        repeat_end: new_drug_info.repeat_end
+        repeat_start: occurrenceObj.repeat_start, repeat_year: occurrenceObj.repeat_year,
+        repeat_month: occurrenceObj.repeat_month, repeat_day: occurrenceObj.repeat_day,
+        repeat_week: occurrenceObj.repeat_week, repeat_weekday: occurrenceObj.repeat_weekday,
+        repeat_end: occurrenceObj.repeat_end
     });
     await occurrence.save();
     const event_id = await occurrence.id;
