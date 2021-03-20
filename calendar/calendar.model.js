@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const schema = new Schema({
     email: {type: String, required: true},
     name: {type: String, required: true},
-    drugList: [{'name': String, 'rxcui': String, 'event_id': String, 'taken_id': String}]
+    drugList: [{'name': String, 'rxcui': String, 'event_id': String, 'taken_id': String, 'dose_id':String}]
 });
 schema.index({email: 1, name: 1}, {unique: true});
 schema.set('toJSON', {

@@ -7,7 +7,7 @@ const schema = new Schema({
     repeat_month: {type: Number, default: 0},
     repeat_day: {type: Number, default: 0},
     repeat_week: {type: Number, default: 0},
-    repeat_weekday: {type: String, default: "-1"},
+    repeat_weekday: [{type: Number, default: 0}],
     repeat_end: {type: String, default: "0"}
 });
 
