@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const xml2js = require('xml2js');
 const parser = new xml2js.Parser();
 const requestPromise = require('request-promise');
@@ -11,7 +13,8 @@ parser.on('error', function (err) {
 module.exports = {
     findDrugByName,
     findInteractions,
-    getDrugImage
+    getDrugImage,
+    findDrugByImage
 };
 
 async function getDrugImage(rxcui) {
@@ -59,6 +62,27 @@ async function findInteractions(email, profileName, newRxcui) {
         }
     }
     return parsedInter;
+}
+
+async function findDrugByImage(file) {
+    console.log(file);
+    //  todo delete next line (and the function) i left it here only so you will be able to see the image that
+    //  the user sent
+    // saveImage('iamge.jpg', file.buffer);
+}
+
+function saveImage(filename, data) {
+    const myBuffer = new Buffer(data.length);
+    for (let i = 0; i < data.length; i++) {
+        myBuffer[i] = data[i];
+    }
+    fs.writeFile(filename, myBuffer, function (err) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log("The file was saved!");
+        }
+    });
 }
 
 async function findDrugByName(drugName) {

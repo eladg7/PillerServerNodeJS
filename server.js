@@ -9,8 +9,9 @@ const consts = require('_helpers/consts');
 const cron = require('node-cron');
 const {mailAllSupervisors} = require("./supervisors/supervisors.mail.service");
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+//  set limit to 25mb (so we will be able to receive images)
+app.use(bodyParser.json({limit: '25mb'}));
+app.use(bodyParser.urlencoded({limit: '25mb', extended: true}));
 app.use(cors());
 
 // use JWT auth to secure the api
