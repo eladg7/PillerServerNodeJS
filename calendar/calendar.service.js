@@ -3,7 +3,7 @@ const {getAllIntakes} = require("../intake_dates/intake_dates.service");
 const Calendar = db.Calendar;
 const Occurrence = db.Occurrence;
 const IntakeDates = db.IntakeDates;
-const User = db.User;
+const Dose = db.Dose;
 
 
 module.exports = {
@@ -28,23 +28,34 @@ async function getByEmailAndName(email, name) {
     } else {
         const drugList = calendar.drugList;
         for (let i = 0; i < drugList.length; i++) {
-            const eventId = drugList[i].event_id;
-            const drugInfo = await Occurrence.findById(eventId);
-            const takenId = drugList[i].taken_id;
-            const intakes = await getAllIntakes(takenId);
-
-
+            const drugObject=await getDrugObjectValues(drugList[i])
             drugInfoList.push({
                 "name": drugList[i].name,
                 "rxcui": drugList[i].rxcui,
-                "occurrence": {"event_id": eventId, "drug_info": drugInfo},
-                "intake_dates":{"taken_id": takenId, "intakes": intakes}
+                "occurrence": drugObject["occurrence"],
+                "intake_dates": drugObject["intake_dates"],
+                "dose":drugObject["dose"]
             });
         }
     }
     const calendarId=await calendar.id
     return {"calendar_id":calendarId,"drug_info_list": drugInfoList};
 }
+
+async function getDrugObjectValues(drugObject){
+     const eventId = drugObject.event_id;
+     const drugInfo = await Occurrence.findById(eventId);
+
+     const takenId = drugObject.taken_id;
+     const intakes = await getAllIntakes(takenId);
+
+     const doseId = drugObject.dose_id;
+     const doseInfo =  await Dose.findById(doseId);
+
+    return {"occurrence": {"event_id": eventId, "drug_info": drugInfo},
+                    "intake_dates":{"taken_id": takenId, "intakes": intakes},
+                    "dose":{"dose_id":doseId,"dose_info":doseInfo}}
+ }
 
 async function deleteFutureOccurrencesOfDrugByUser(email, name, event_id, repeat_end) {
     const calendar = await Calendar.findOne({email: email, name: name});
@@ -94,6 +105,20 @@ async function add_new_drug(email, profileName, new_drug_info) {
 // }
 
 async function add_drug(calendar, new_drug_info) {
+    const drug_name = new_drug_info.name;
+    const drug_rxcui = new_drug_info.rxcui;
+
+    const event_id=await createOccurForDrug(new_drug_info);
+    const taken_id = await createIntakeDatesForDrug(new_drug_info);
+    const dose_id = await createDoseForDrug(new_drug_info);
+
+    const new_drug = {'name': drug_name, "rxcui": drug_rxcui,
+                    'event_id': event_id, 'taken_id': taken_id,'dose_id':dose_id};
+    calendar.drugList.push(new_drug);
+    await calendar.save();
+    return {event_id: event_id, taken_id: taken_id};
+}
+async function createOccurForDrug(new_drug_info){
     const occurrenceObj=new_drug_info.occurrence
     const occurrence = new Occurrence({
         repeat_start: occurrenceObj.repeat_start, repeat_year: occurrenceObj.repeat_year,
@@ -102,16 +127,20 @@ async function add_drug(calendar, new_drug_info) {
         repeat_end: occurrenceObj.repeat_end
     });
     await occurrence.save();
-    const event_id = await occurrence.id;
-    const drug_name = new_drug_info.name;
-    const drug_rxcui = new_drug_info.rxcui;
+    return await occurrence.id;
+}
+
+async function  createIntakeDatesForDrug(){
     const taken = new IntakeDates();
     await taken.save();
-    const taken_id = await taken.id;
-    const new_drug = {'name': drug_name, "rxcui": drug_rxcui, 'event_id': event_id, 'taken_id': taken_id};
-    calendar.drugList.push(new_drug);
-    await calendar.save();
-    return {event_id: event_id, taken_id: taken_id};
+    return await taken.id;
+}
+
+async function createDoseForDrug(new_drug_info){
+    const doseInfo=new_drug_info.dose_info
+    const dose = new Dose({'measurement_type':doseInfo.measurement_type,'total_dose':doseInfo.total_dose});
+    await dose.save();
+    return await dose.id;
 }
 
 async function update_drug(email, name, event_id, drug_info) {
@@ -125,8 +154,7 @@ async function delete_drug(email, name, event_id, returnCalendar = false) {
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
         if (drugList[i].event_id == event_id) { //has to be ==, not the same type
-            await Occurrence.findByIdAndDelete(event_id);
-            await IntakeDates.findByIdAndDelete(drugList[i].taken_id);
+            await deleteAllInsideDrug(drugList[i]);
             drugList.splice(i, 1);
             break;
         }
@@ -146,9 +174,15 @@ async function _delete(email,name) {
 
     // delete all occurrences in calendar
     for (let i = 0; i < drugList.length; i++) {
-        await Occurrence.findByIdAndDelete(drugList[i].event_id);
-        await IntakeDates.findByIdAndDelete(drugList[i].taken_id);
+        await deleteAllInsideDrug(drugList[i]);
     }
 
     await Calendar.deleteOne({email: email, name: name});
+}
+
+
+async function deleteAllInsideDrug(drugObject){
+    await Occurrence.findByIdAndDelete(drugObject.event_id);
+    await IntakeDates.findByIdAndDelete(drugObject.taken_id);
+    await Dose.findByIdAndDelete(drugObject.dose_id);
 }

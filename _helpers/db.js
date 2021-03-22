@@ -15,5 +15,7 @@ module.exports = {
     Occurrence: require('../calendar/occurrence.model'),
     Profile: require('../profile/profile.model'),
     Supervisors: require('../supervisors/supervisors.model'),
-    IntakeDates: require('../intake_dates/intake_dates.model')
+    IntakeDates: require('../intake_dates/intake_dates.model'),
+    Dose: require('../dose/dose.model')
+
 };
