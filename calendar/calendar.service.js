@@ -116,7 +116,7 @@ async function add_drug(calendar, new_drug_info) {
                     'event_id': event_id, 'taken_id': taken_id,'dose_id':dose_id};
     calendar.drugList.push(new_drug);
     await calendar.save();
-    return {event_id: event_id, taken_id: taken_id};
+    return {event_id: event_id, taken_id: taken_id,dose_id:dose_id};
 }
 async function createOccurForDrug(new_drug_info){
     const occurrenceObj=new_drug_info.occurrence
