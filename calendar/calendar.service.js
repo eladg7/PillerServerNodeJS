@@ -4,7 +4,7 @@ const Calendar = db.Calendar;
 const Occurrence = db.Occurrence;
 const IntakeDates = db.IntakeDates;
 const Dose = db.Dose;
-
+const Refill = db.Refill;
 
 module.exports = {
     getByEmailAndName,
@@ -35,7 +35,8 @@ async function getByEmailAndName(email, name) {
                 "rxcui": drugList[i].rxcui,
                 "occurrence": drugObject["occurrence"],
                 "intake_dates": drugObject["intake_dates"],
-                "dose": drugObject["dose"]
+                "dose": drugObject["dose"],
+                "refill":drugObject["refill"]
             });
         }
     }
@@ -53,11 +54,15 @@ async function getDrugObjectValues(drugObject) {
     const doseId = drugObject.dose_id;
     const doseInfo = await Dose.findById(doseId);
 
+    const refillId=drugObject.refill_id;
+    const refillInfo = await Refill.findById(refillId);
+
+
     return {
         "occurrence": {"event_id": eventId, "drug_info": drugInfo},
         "intake_dates": {"taken_id": takenId, "intakes": intakes},
-        "dose": {"dose_id": doseId, "dose_info": doseInfo}
-    };
+        "dose": {"dose_id": doseId, "dose_info": doseInfo},
+        "refill":{"refill_id": refillId, "refill_info": refillInfo}
 }
 
 async function deleteFutureOccurrencesOfDrugByUser(email, name, drug_id, repeat_end) {
@@ -120,16 +125,17 @@ async function add_drug(calendar, new_drug_info) {
     const event_id = await createOccurForDrug(new_drug_info);
     const taken_id = await createIntakeDatesForDrug(new_drug_info);
     const dose_id = await createDoseForDrug(new_drug_info);
+    const refill_id = await createRefillForDrug(new_drug_info);
 
     const new_drug = {
         'name': drug_name, "rxcui": drug_rxcui,
-        'event_id': event_id, 'taken_id': taken_id, 'dose_id': dose_id
+        'event_id': event_id, 'taken_id': taken_id,'refill_id':refill_id, 'dose_id': dose_id
     };
 
     calendar.drugList.push(new_drug);
     await calendar.save();
     const newDrugId = calendar.drugList[calendar.drugList.length - 1].id;
-    return {drug_id: newDrugId, event_id: event_id, taken_id: taken_id, dose_id: dose_id};
+    return {drug_id: newDrugId, event_id: event_id, taken_id: taken_id, dose_id: dose_id, refill_id:refill_id};
 }
 
 async function createOccurForDrug(new_drug_info) {
@@ -155,6 +161,14 @@ async function createDoseForDrug(new_drug_info) {
     const dose = new Dose({'measurement_type': doseInfo.measurement_type, 'total_dose': doseInfo.total_dose});
     await dose.save();
     return await dose.id;
+}
+
+async function createRefillForDrug(new_drug_info) {
+    const refillInfo = new_drug_info.refill;
+    const refill = new Refill({'is_to_notify': refillInfo.is_to_notify, 'pills_left': refillInfo.pills_left,
+        'pills_before_reminder':refillInfo.pills_before_reminder, 'reminder_time':refillInfo.reminder_time});
+    await refill.save();
+    return await refill.id;
 }
 
 async function update_drug(email, name, drug_id, drug_info) {
@@ -199,4 +213,6 @@ async function deleteAllInsideDrug(drugObject) {
     await Occurrence.findByIdAndDelete(drugObject.event_id);
     await IntakeDates.findByIdAndDelete(drugObject.taken_id);
     await Dose.findByIdAndDelete(drugObject.dose_id);
+    await Refill.findByIdAndDelete(drugObject.refill_id);
+
 }

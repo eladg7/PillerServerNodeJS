@@ -3,15 +3,15 @@ const router = express.Router();
 const IntakeService = require('./intake_dates.service');
 
 // routes
-router.post('/setIntakeTaken/:taken_id/:date', setIntakeTaken);
-router.post('/setIntakeNotTaken/:taken_id/:date', setIntakeNotTaken);
+router.post('/setIntakeTaken/:taken_id/:refill_id/:date', setIntakeTaken);
+router.post('/setIntakeNotTaken/:taken_id/:refill_id/:date', setIntakeNotTaken);
 router.get('/getAllIntakes/:taken_id', getAllIntakes);
 
 module.exports = router;
 
 
 function setIntakeTaken(req, res, next) {
-    IntakeService.setIntake(req.params.taken_id, req.params.date, true)
+    IntakeService.setIntake(req.params.taken_id,req.params.refill_id, req.params.date, true)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
