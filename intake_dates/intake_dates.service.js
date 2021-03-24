@@ -24,9 +24,9 @@ async function setIntake(intake_id,refillId, date, taken) {
 
 async function updatePillsLeft(taken,refillId){
     if(taken){
-        decreasePillsLeft(refillId);
+        await decreasePillsLeft(refillId);
     }else{
-        increasePillsLeft(refillId);
+        await increasePillsLeft(refillId);
     }
 }
 
