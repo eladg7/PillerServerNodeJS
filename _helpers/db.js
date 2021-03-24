@@ -12,6 +12,7 @@ mongoose.Promise = global.Promise;
 module.exports = {
     User: require('../user/user.model'),
     Calendar: require('../calendar/calendar.model'),
+    Drug: require('../drug/drug.model'),
     Occurrence: require('../calendar/occurrence.model'),
     Profile: require('../profile/profile.model'),
     Supervisors: require('../supervisors/supervisors.model'),

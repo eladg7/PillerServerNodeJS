@@ -5,6 +5,8 @@ const Occurrence = db.Occurrence;
 const IntakeDates = db.IntakeDates;
 const Dose = db.Dose;
 const Refill = db.Refill;
+const Drug = db.Drug;
+
 
 module.exports = {
     getByEmailAndName,
@@ -17,9 +19,6 @@ module.exports = {
 
 async function getByEmailAndName(email, name) {
     const drugInfoList = [];
-    // const user = await User.findOne({email: email});
-    // // validate
-    // if (!user) throw 'User ' + email + ' not found';
     let calendar = await Calendar.findOne({email: email, name: name});
 
     if (!calendar) {
@@ -29,22 +28,17 @@ async function getByEmailAndName(email, name) {
         const drugList = calendar.drugList;
         for (let i = 0; i < drugList.length; i++) {
             const drugObject = await getDrugObjectValues(drugList[i])
-            drugInfoList.push({
-                "drug_id": drugList[i].id,
-                "name": drugList[i].name,
-                "rxcui": drugList[i].rxcui,
-                "occurrence": drugObject["occurrence"],
-                "intake_dates": drugObject["intake_dates"],
-                "dose": drugObject["dose"],
-                "refill": drugObject["refill"]
-            });
+            drugInfoList.push(drugObject);
         }
     }
     const calendarId = await calendar.id;
     return {"calendar_id": calendarId, "drug_info_list": drugInfoList};
 }
 
-async function getDrugObjectValues(drugObject) {
+async function getDrugObjectValues(drugId) {
+    const drugObject= await Drug.findById(drugId);
+    if(!drugObject) throw 'Drug id was not found in data base. Could not get drug Info.'
+
     const eventId = drugObject.event_id;
     const drugInfo = await Occurrence.findById(eventId);
 
@@ -59,6 +53,7 @@ async function getDrugObjectValues(drugObject) {
 
 
     return {
+        "drug_id": drugId ,"name": drugObject.name, "rxcui":drugObject.rxcui,
         "occurrence": {"event_id": eventId, "drug_info": drugInfo},
         "intake_dates": {"taken_id": takenId, "intakes": intakes},
         "dose": {"dose_id": doseId, "dose_info": doseInfo},
@@ -107,36 +102,26 @@ async function add_new_drug(email, profileName, new_drug_info) {
     return await add_drug(calendar, new_drug_info);
 }
 
-
-// function doesDrugExists(drugList, rxcui, drug_name) {
-//     let result = false;
-//     for (let i = 0; i < drugList.length; i++) {
-//         if (drugList[i].rxcui == rxcui && drug_name === drugList[i].name) {
-//             result = true;
-//             break;
-//         }
-//     }
-//     return result;
-// }
-
 async function add_drug(calendar, new_drug_info) {
     const drug_name = new_drug_info.name;
     const drug_rxcui = new_drug_info.rxcui;
-
     const event_id = await createOccurForDrug(new_drug_info);
     const taken_id = await createIntakeDatesForDrug(new_drug_info);
     const dose_id = await createDoseForDrug(new_drug_info);
     const refill_id = await createRefillForDrug(new_drug_info);
 
-    const new_drug = {
-        'name': drug_name, "rxcui": drug_rxcui,
-        'event_id': event_id, 'taken_id': taken_id, 'refill_id': refill_id, 'dose_id': dose_id
-    };
+    const drugId = await createDrug(drug_name,drug_rxcui,event_id,taken_id,dose_id,refill_id);
 
-    calendar.drugList.push(new_drug);
+    calendar.drugList.push(drugId);
     await calendar.save();
-    const newDrugId = calendar.drugList[calendar.drugList.length - 1].id;
-    return {drug_id: newDrugId, event_id: event_id, taken_id: taken_id, dose_id: dose_id, refill_id: refill_id};
+    return {drug_id: drugId, event_id: event_id, taken_id: taken_id, dose_id: dose_id, refill_id: refill_id};
+}
+
+async function createDrug(drug_name,drug_rxcui,event_id,taken_id,dose_id,refill_id){
+    const drug = new Drug({'name': drug_name, "rxcui": drug_rxcui,
+        'event_id': event_id, 'taken_id': taken_id, 'refill_id': refill_id, 'dose_id': dose_id});
+    await drug.save();
+    return await drug.id;
 }
 
 async function createOccurForDrug(new_drug_info) {
@@ -184,8 +169,8 @@ async function delete_drug(email, name, drug_id, returnCalendar = false) {
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
-        if (drugList[i].id === drug_id) { //has to be ==, not the same type
-            await deleteAllInsideDrug(drugList[i]);
+        if (drugList[i] === drug_id) {
+            await deleteAllDrugObject(drugList[i]);
             drugList.splice(i, 1);
             break;
         }
@@ -205,16 +190,22 @@ async function _delete(email, name) {
 
     // delete all occurrences in calendar
     for (let i = 0; i < drugList.length; i++) {
-        await deleteAllInsideDrug(drugList[i]);
+        await deleteAllDrugObject(drugList[i]);
     }
 
     await Calendar.deleteOne({email: email, name: name});
 }
 
 
-async function deleteAllInsideDrug(drugObject) {
+async function deleteAllDrugObject(drugId) {
+    const drugObject= await Drug.findById(drugId);
+    if(!drugObject) throw 'Could not delete drug, no such drug exists.'
+
     await Occurrence.findByIdAndDelete(drugObject.event_id);
     await IntakeDates.findByIdAndDelete(drugObject.taken_id);
     await Dose.findByIdAndDelete(drugObject.dose_id);
     await Refill.findByIdAndDelete(drugObject.refill_id);
+
+    //last step delete drug
+    await Drug.findByIdAndDelete(drugId);
 }
