@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     measurement_type: {type: String, required: true, default: "mg"},
-    total_dose: {type: Number, default: 0}
+    total_dose: {type: Number, default: 0.0}
 
 });
 
