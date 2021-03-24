@@ -16,6 +16,8 @@ module.exports = {
     Profile: require('../profile/profile.model'),
     Supervisors: require('../supervisors/supervisors.model'),
     IntakeDates: require('../intake_dates/intake_dates.model'),
-    Dose: require('../dose/dose.model')
+    Dose: require('../dose/dose.model'),
+    Refill: require('../refill/refill.model')
+
 
 };
