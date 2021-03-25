@@ -12,13 +12,13 @@ module.exports = router;
 
 function setIntakeTaken(req, res, next) {
     IntakeService.setIntake(req.params.taken_id,req.params.refill_id, req.params.date, true)
-        .then(() => res.json({}))
+        .then(pillsLeft => res.json(pillsLeft))
         .catch(err => next(err));
 }
 
 function setIntakeNotTaken(req, res, next) {
-    IntakeService.setIntake(req.params.taken_id, req.params.date, false)
-        .then(() => res.json({}))
+    IntakeService.setIntake(req.params.taken_id, req.params.refill_id, req.params.date, false)
+        .then(pillsLeft => res.json(pillsLeft))
         .catch(err => next(err));
 }
 
