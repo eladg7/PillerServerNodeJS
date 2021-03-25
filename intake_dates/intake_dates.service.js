@@ -17,17 +17,20 @@ async function setIntake(intake_id,refillId, date, taken) {
     } else {
         intakeDates.intakes[indexInArray].isTaken = taken;
     }
-    await updatePillsLeft(taken,refillId);
+    const pillsLeft= await updatePillsLeft(taken,refillId);
     await intakeDates.save();
+    return pillsLeft;
 }
 
 
 async function updatePillsLeft(taken,refillId){
+    var pillsLeft;
     if(taken){
-        await decreasePillsLeft(refillId);
+        pillsLeft=await decreasePillsLeft(refillId);
     }else{
-        await increasePillsLeft(refillId);
+        pillsLeft =await increasePillsLeft(refillId);
     }
+    return pillsLeft
 }
 
 function getElementIndex(array, valueToCheck) {
