@@ -86,6 +86,7 @@ function saveImage(filename, data) {
 }
 
 async function findDrugByName(drugName) {
+    //const parsedDrugName=drugName.replace(/ /g,"+");
     const options = {
         uri: 'https://rxnav.nlm.nih.gov/REST/drugs',
         qs: {
@@ -145,7 +146,8 @@ function parseDrugsXML(drugXML) {
             // https://mor.nlm.nih.gov/download/rxnav/RxNormAPIs.html#uLink=RxNorm_REST_getDrugs
             //  we'll take only: branded drug (SBD) or branded pack (BPCK)
             const itemTTY = item["tty"].toString()
-            if ("conceptProperties" in item && (itemTTY === "SBD" || itemTTY === "BPCK")) {
+            if ("conceptProperties" in item &&
+                (itemTTY === "SBD" || itemTTY === "SCD" ||itemTTY === "SBDC"  )) { // itemTTY === "BPCK"
                 drugOptions.push(getDrugsFromConceptProperties(item.conceptProperties));
             }
         }
