@@ -11,6 +11,6 @@ module.exports = router;
 
 function findDrugByBoxImage(req, res, next) {
     OcrService.findDrugByBoxImage(req.file)
-        .then(pillsLeft => res.json(pillsLeft))
+        .then(result => res.json(result))
         .catch(err => next(err));
 }
