@@ -15,22 +15,17 @@ parser.on('error', function (err) {
 });
 
 async function findDrugByBoxImage(file) {
-
-    const fs = require('fs');
-
-    //await fs.readFile('test_images/6.jpg', async function (err, data) {
     const options = {
         method: 'POST',
         uri: 'http://127.0.0.1:5000/drugByBox',
         body: {
-            file: data
+            file: file.buffer
         },
         json: true
     };
 
     const result = await requestPromise(options);
     return await findDrugNameFromString(result);
-    //});
 }
 
 async function findDrugNameFromString(possibleDrugName) {
@@ -38,12 +33,11 @@ async function findDrugNameFromString(possibleDrugName) {
         return /\S/.test(entry);
     });
     const measurementResult = findMeasurementInfo(possibleDrugName);
-    return await findPossibleDrugNames(splittedResult, measurementResult)
-
+    return await findPossibleDrugNames(splittedResult, measurementResult);
 }
 
 async function findPossibleDrugNames(splittedResult, measurementResult) {
-    var drugOptions = []
+    let drugOptions = [];
     drugOptions = await findPossibleDrugNamesWithMeasurement(splittedResult, measurementResult);
     if (drugOptions.length === 0) {
         //could not find results when added measurement to string
@@ -119,5 +113,4 @@ function findMeasurementInfo(possibleDrugName) {
         }
     }
     return measurementResult;
-
 }
