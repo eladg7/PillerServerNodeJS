@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const drugService = require('./drug_api_calls.service');
+const ocrService = require('../ocr/ocr.service');
 const multer = require('multer');
 const upload = multer();
 
@@ -9,6 +10,7 @@ router.get('/findInteractions/:email/:profileName/:newRxcui', findInteractions);
 router.get('/getDrugImage', getDrugImage);
 //  user upload.single because we will receive amn image as multi-part
 router.post('/findDrugByImage', upload.single('file'), findDrugByImage);
+router.post('/findDrugByBoxImage', upload.single('file'), findDrugByBoxImage);
 
 module.exports = router;
 
@@ -32,6 +34,12 @@ function findInteractions(req, res, next) {
 
 function findDrugByImage(req, res, next) {
     drugService.findDrugByImage(req.file)
+        .then(result => res.json(result))
+        .catch(err => next(err));
+}
+
+function findDrugByBoxImage(req, res, next) {
+    ocrService.findDrugByBoxImage(req.file)
         .then(result => res.json(result))
         .catch(err => next(err));
 }
