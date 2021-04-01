@@ -19,6 +19,4 @@ module.exports = {
     IntakeDates: require('../intake_dates/intake_dates.model'),
     Dose: require('../dose/dose.model'),
     Refill: require('../refill/refill.model')
-
-
 };

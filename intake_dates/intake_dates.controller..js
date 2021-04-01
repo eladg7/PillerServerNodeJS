@@ -11,7 +11,7 @@ module.exports = router;
 
 
 function setIntakeTaken(req, res, next) {
-    IntakeService.setIntake(req.params.taken_id,req.params.refill_id, req.params.date, true)
+    IntakeService.setIntake(req.params.taken_id, req.params.refill_id, req.params.date, true)
         .then(pillsLeft => res.json(pillsLeft))
         .catch(err => next(err));
 }
