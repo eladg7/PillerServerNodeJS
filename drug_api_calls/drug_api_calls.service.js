@@ -109,28 +109,32 @@ async function findDrugByName(drugName) {
 
 function parseInteraction(interactionResult, newRxcui) {
     var result = [];
-    var interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
-    for (var i = 0; i < interactionsType.length; i++) {
-        //notify interaction with the new drug only
-        if (interactionsType[i].minConcept[0].rxcui == newRxcui) {
-            // push the first interaction drug
-            result.push({
-                interaction: {
-                    rxcui: interactionsType[i].minConcept[1].rxcui, name: interactionsType[i].minConcept[1].name
-                },
-                description: interactionsType[i].interactionPair[0].description
-            })
-        } else if (interactionsType[i].minConcept[1].rxcui == newRxcui) {
-            //push the second interaction drug
-            result.push({
-                interaction: {
-                    rxcui: interactionsType[i].minConcept[0].rxcui, name: interactionsType[i].minConcept[0].name
-                },
-                description: interactionsType[i].interactionPair[0].description
-            })
-        }
+    if(interactionResult.fullInteractionTypeGroup !== undefined){
+        //there are interactions
+        var interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
+        for (var i = 0; i < interactionsType.length; i++) {
+            //notify interaction with the new drug only
+            if (interactionsType[i].minConcept[0].rxcui == newRxcui) {
+                // push the first interaction drug
+                result.push({
+                    interaction: {
+                        rxcui: interactionsType[i].minConcept[1].rxcui, name: interactionsType[i].minConcept[1].name
+                    },
+                    description: interactionsType[i].interactionPair[0].description
+                })
+            } else if (interactionsType[i].minConcept[1].rxcui == newRxcui) {
+                //push the second interaction drug
+                result.push({
+                    interaction: {
+                        rxcui: interactionsType[i].minConcept[0].rxcui, name: interactionsType[i].minConcept[0].name
+                    },
+                    description: interactionsType[i].interactionPair[0].description
+                })
+            }
 
+        }
     }
+
     return result;
 
 }
