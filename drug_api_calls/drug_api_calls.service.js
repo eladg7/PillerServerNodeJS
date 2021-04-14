@@ -65,7 +65,20 @@ async function findInteractions(email, profileName, newRxcui) {
 }
 
 async function findDrugByImage(file) {
-    console.log(file);
+    if (file !== undefined && file.buffer !== undefined) {
+        const options = {
+            method: 'POST',
+            uri: 'http://127.0.0.1:5000/drugByImage',
+            body: {
+                file: file.buffer
+            },
+            json: true
+        };
+
+        const result = await requestPromise(options);
+        //  todo send request to api with the properties
+    }
+    return {};
     //  todo delete next line (and the function) i left it here only so you will be able to see the image that
     //  the user sent
     // saveImage('iamge.jpg', file.buffer);
@@ -108,8 +121,8 @@ async function findDrugByName(drugName) {
 
 
 function parseInteraction(interactionResult, newRxcui) {
-    var result = [];
-    if(interactionResult.fullInteractionTypeGroup !== undefined){
+    const result = [];
+    if (interactionResult.fullInteractionTypeGroup !== undefined) {
         //there are interactions
         var interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
         for (var i = 0; i < interactionsType.length; i++) {
@@ -151,7 +164,7 @@ function parseDrugsXML(drugXML) {
             //  we'll take only: branded drug (SBD) or branded pack (BPCK)
             const itemTTY = item["tty"].toString()
             if ("conceptProperties" in item &&
-                (itemTTY === "SBD" || itemTTY === "SCD" ||itemTTY === "SBDC"  )) { // itemTTY === "BPCK"
+                (itemTTY === "SBD" || itemTTY === "SCD" || itemTTY === "SBDC")) { // itemTTY === "BPCK"
                 drugOptions.push(getDrugsFromConceptProperties(item.conceptProperties));
             }
         }

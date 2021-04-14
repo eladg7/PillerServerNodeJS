@@ -15,6 +15,7 @@ parser.on('error', function (err) {
 });
 
 async function findDrugByBoxImage(file) {
+    //  todo handle file is undefined
     const options = {
         method: 'POST',
         uri: 'http://127.0.0.1:5000/drugByBox',
