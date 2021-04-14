@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    userId: {type: String, unique: true, required: true},
+    email: {type: String, unique: true, required: true},
     supervisorsList: [{'supervisorName': String, 'supervisorEmail': String, 'isConfirmed': Boolean}],
     threshold: {type: Number, required: true}
 });

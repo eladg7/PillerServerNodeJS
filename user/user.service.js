@@ -45,7 +45,7 @@ async function emailResetPassword(email) {
     user.password = bcrypt.hashSync(newPassword, 10);
     await user.save();
     sendMailHTML([user.email], 'Password Reset For Piller',
-        "<p>Your password was reset in Piller, your new password is:<br>" + newPassword + "</p>")
+        "<p>Your password was reset in Piller, your new password is:<br>" + newPassword+"</p>")
 }
 
 
@@ -64,7 +64,6 @@ async function create(userParam) {
 
     // save user
     await user.save();
-    return await user.id;
 }
 
 async function updatePassword(email, userParam) {
