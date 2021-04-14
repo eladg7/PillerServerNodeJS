@@ -6,6 +6,7 @@ const sendMailHTML = require('_helpers/mailManager');
 const consts = require('_helpers/consts');
 
 const Supervisors = db.Supervisors;
+const Users = db.User;
 
 module.exports = {
     getSupervisors,
@@ -21,20 +22,20 @@ module.exports = {
 };
 
 
-async function getSupervisors(email) {
-    let userSupervisors = await Supervisors.findOne({email: email});
+async function getSupervisors(userId) {
+    let userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         userSupervisors = new Supervisors(
-            {email: email, supervisorsList: [], missedDrugEvents: [], threshold: 3})
+            {userId: userId, supervisorsList: [], missedDrugEvents: [], threshold: 3})
         await userSupervisors.save();
     }
 
     return {'supervisorsList': userSupervisors.supervisorsList};
 }
 
-async function getConfirmedSupervisors(email) {
-    let userSupervisors = await Supervisors.findOne({email: email});
-    var confirmedSupervisors = [];
+async function getConfirmedSupervisors(userId) {
+    let userSupervisors = await Supervisors.findOne({userId: userId});
+    const confirmedSupervisors = [];
     if (userSupervisors) {
         const allSupervisors = userSupervisors.supervisorsList;
         for (let i = 0; i < allSupervisors.length; i++) {
@@ -64,34 +65,36 @@ async function getConfirmedSupervisors(email) {
 //     }
 // }
 
-async function addSupervisor(email, supervisorName, supervisorEmail) {
-    var userSupervisors = await Supervisors.findOne({email: email});
+async function addSupervisor(userId, supervisorName, supervisorEmail) {
+    const userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw 'Supervisor list does not exist.';
     }
     const supervisors = userSupervisors.supervisorsList;
-    for (var i = 0; i < supervisors.length; i++) {
+    for (let i = 0; i < supervisors.length; i++) {
         if (supervisors[i].supervisorEmail === supervisorEmail) {
             throw 'Supervisor already exists.';
         }
     }
     supervisors.push({'supervisorName': supervisorName, 'supervisorEmail': supervisorEmail, 'isConfirmed': false});
-    userSupervisors.save();
-
-    sendEmailConfirmation(email, supervisorName, supervisorEmail);
+    await userSupervisors.save();
+    const user = await Users.findById(userId);
+    if (user) {
+        sendEmailConfirmation(user, supervisorName, supervisorEmail);
+    }
 }
 
-function sendEmailConfirmation(email, supervisorName, supervisorEmail) {
+function sendEmailConfirmation(user, supervisorName, supervisorEmail) {
     const httpConfirmation = 'http://' + consts.serverConfig['IP'] + ':' + consts.serverConfig['PORT']
-        + "/supervisors/confirmation/" + email + "/" + supervisorName + "/" + supervisorEmail;
-    const message = "<p>Hello " + supervisorName + "!<br>" + "A Piller user with the email " + email +
+        + "/supervisors/confirmation/" + user.id + "/" + supervisorName + "/" + supervisorEmail;
+    const message = "<p>Hello " + supervisorName + "!<br>" + "A Piller user with the email " + user.email +
         " has asked you to be his supervisor.<br>" +
         "<a href=" + httpConfirmation + ">Click here to confirm</a> </p>";
     sendMailHTML([supervisorEmail], 'Piller - Supervisor confirmation', message)
 }
 
-async function updateConfirmation(email, supervisorName, supervisorEmail) {
-    var userSupervisors = await Supervisors.findOne({email: email});
+async function updateConfirmation(userId, supervisorName, supervisorEmail) {
+    const userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw 'Supervisor list does not exist.'
     }
@@ -109,15 +112,15 @@ async function updateConfirmation(email, supervisorName, supervisorEmail) {
         }
     }
     if (found) {
-        userSupervisors.save()
+        await userSupervisors.save()
         return true;
     }
     throw 'Supervisor in not in user\'s list.'
 }
 
 
-async function deleteSupervisor(email, supervisorEmail) {
-    var userSupervisors = await Supervisors.findOne({email: email});
+async function deleteSupervisor(userId, supervisorEmail) {
+    const userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw 'Supervisor list does not exist.'
     }
@@ -125,24 +128,24 @@ async function deleteSupervisor(email, supervisorEmail) {
     for (var i = 0; i < supervisors.length; i++) {
         if (supervisors[i].supervisorEmail === supervisorEmail) {
             supervisors.splice(i, 1);
-            userSupervisors.save();
+            await userSupervisors.save();
             break;
         }
     }
 }
 
-async function updateThreshold(email, threshHold) {
-    var userSupervisors = await Supervisors.findOne({email: email});
+async function updateThreshold(userId, threshHold) {
+    const userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw 'Supervisors list does not exist.'
     }
 
     userSupervisors.threshold = threshHold;
-    userSupervisors.save();
+    await userSupervisors.save();
 }
 
-async function getThreshold(email) {
-    const userSupervisors = await Supervisors.findOne({email: email});
+async function getThreshold(userId) {
+    const userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw 'Supervisors list does not exist.'
     }
@@ -150,6 +153,6 @@ async function getThreshold(email) {
     return {'threshold': userSupervisors.threshold}
 }
 
-async function deleteSupervisorList(email) {
-    await Supervisors.deleteOne({email: email});
+async function deleteSupervisorList(userId) {
+    await Supervisors.deleteOne({userId: userId});
 }
