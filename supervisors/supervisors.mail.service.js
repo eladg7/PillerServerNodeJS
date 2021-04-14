@@ -72,7 +72,7 @@ function hasConsecutiveNotTaken(intakes) {
 function mailSupervisors(user, supervisors, drug, threshold) {
     for (let i = 0; i < supervisors.length; i++) {
         const unsubscribe_link = 'http://' + consts.serverConfig['IP'] + ':' + consts.serverConfig['PORT']
-            + "/supervisors/unsubscribe/" + user.email + "/" + supervisors[i].supervisorEmail;
+            + "/supervisors/unsubscribe/" + user.userId + "/" + supervisors[i].supervisorEmail;
         const message = "<p>Hello " + supervisors[i].supervisorName + "!<br>" + user.name + " didn't take " + drug.name
             + " for the past " + threshold + " days." + "<br> To unsubscribe from being " + user.name
             + "'s supervisor, press " + "<a href=" + unsubscribe_link + ">here</a> </p>";
