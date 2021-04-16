@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    email: {type: String, required: true},
-    name: {type: String, required: true},
+    userId: {type: String, required: true},
+    profileId: {type: String, required: true},
     drugList: [{type:String, required: true}] //drugid's
 });
-schema.index({email: 1, name: 1}, {unique: true});
+schema.index({userId: 1, profileId: 1}, {unique: true});
 schema.set('toJSON', {
     virtuals: true,
     versionKey: false,

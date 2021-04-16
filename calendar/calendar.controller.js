@@ -3,49 +3,49 @@ const router = express.Router();
 const calendarService = require('./calendar.service');
 
 // routes
-router.post('/addDrug/:email/:name', add_drug);
-router.delete('/deleteDrug/:email/:name', delete_drug);
-router.get('/:email/:name', getByEmailAndName);
-router.post('/updateDrug/:email/:name/:drug_id', update_drug);
-router.delete('/:email/:name', _delete);
-router.put('/deleteFutureOccurrencesOfDrugByUser/:email/:name', deleteFutureOccurrencesOfDrugByUser);
+router.post('/addDrug/:userId/:profileId', add_drug);
+router.delete('/deleteDrug/:userId/:profileId', delete_drug);
+router.get('/:userId/:profileId', getSpecificCalendar);
+router.post('/updateDrug/:userId/:profileId/:drug_id', update_drug);
+router.delete('/:userId/:profileId', _delete);
+router.put('/deleteFutureOccurrencesOfDrugByUser/:userId/:profileId', deleteFutureOccurrencesOfDrugByUser);
 
 module.exports = router;
 
 
-function getByEmailAndName(req, res, next) {
-    calendarService.getByEmailAndName(req.params.email, req.params.name)
+function getSpecificCalendar(req, res, next) {
+    calendarService.getSpecificCalendar(req.params.userId, req.params.profileId)
         .then(calendars => res.json(calendars))
         .catch(err => next(err));
 }
 
 function deleteFutureOccurrencesOfDrugByUser(req, res, next) {
-    calendarService.deleteFutureOccurrencesOfDrugByUser(req.params.email, req.params.name, req.query["drug_id"], req.query["repeat_end"])
+    calendarService.deleteFutureOccurrencesOfDrugByUser(req.params.userId, req.params.profileId, req.query["drug_id"], req.query["repeat_end"])
         .then(() => res.json({}))
         .catch(err => next(err));
 }
 
 function update_drug(req, res, next) {
-    calendarService.update_drug(req.params.email, req.params.name, req.params.drug_id, req.body)
+    calendarService.update_drug(req.params.userId, req.params.profileId, req.params.drug_id, req.body)
         .then(event_id_arr => res.json(event_id_arr))
         .catch(err => next(err));
 }
 
 //  req.query["drug_id"] means that it'll be in the end of the url with ?drug_id=....
 function delete_drug(req, res, next) {
-    calendarService.delete_drug(req.params.email, req.params.name, req.query["drug_id"])
+    calendarService.delete_drug(req.params.userId, req.params.profileId, req.query["drug_id"])
         .then(() => res.json({}))
         .catch(err => next(err));
 }
 
 function add_drug(req, res, next) {
-    calendarService.add_new_drug(req.params.email, req.params.name, req.body)
+    calendarService.add_new_drug(req.params.userId, req.params.profileId, req.body)
         .then(event_id => res.json(event_id))
         .catch(err => next(err));
 }
 
 function _delete(req, res, next) {
-    calendarService.delete(req.params.email, req.params.name)
+    calendarService.delete(req.params.userId, req.params.profileId)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
