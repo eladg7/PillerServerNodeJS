@@ -31,8 +31,7 @@ async function getSpecificCalendar(userId, profileId) {
             drugInfoList.push(drugObject);
         }
     }
-    const calendarId = await calendar.id;
-    return {"calendar_id": calendarId, "drug_info_list": drugInfoList};
+    return {"calendar_id": calendar.id, "drug_info_list": drugInfoList};
 }
 
 async function getDrugObjectValues(drugId) {
@@ -121,7 +120,7 @@ async function createDrug(drug_name,drug_rxcui,event_id,taken_id,dose_id,refill_
     const drug = new Drug({'name': drug_name, "rxcui": drug_rxcui,
         'event_id': event_id, 'taken_id': taken_id, 'refill_id': refill_id, 'dose_id': dose_id});
     await drug.save();
-    return await drug.id;
+    return drug.id;
 }
 
 async function createOccurForDrug(new_drug_info) {
@@ -133,20 +132,20 @@ async function createOccurForDrug(new_drug_info) {
         repeat_end: occurrenceObj.repeat_end
     });
     await occurrence.save();
-    return await occurrence.id;
+    return  occurrence.id;
 }
 
 async function createIntakeDatesForDrug() {
     const taken = new IntakeDates();
     await taken.save();
-    return await taken.id;
+    return taken.id;
 }
 
 async function createDoseForDrug(new_drug_info) {
     const doseInfo = new_drug_info.dose;
     const dose = new Dose({'measurement_type': doseInfo.measurement_type, 'total_dose': doseInfo.total_dose});
     await dose.save();
-    return await dose.id;
+    return dose.id;
 }
 
 async function createRefillForDrug(new_drug_info) {
@@ -156,7 +155,7 @@ async function createRefillForDrug(new_drug_info) {
         'pills_before_reminder': refillInfo.pills_before_reminder, 'reminder_time': refillInfo.reminder_time
     });
     await refill.save();
-    return await refill.id;
+    return refill.id;
 }
 
 async function update_drug(userId, profileId, drug_id, drug_info) {

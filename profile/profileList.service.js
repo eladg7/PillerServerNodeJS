@@ -31,9 +31,8 @@ async function getAllProfiles(userId) {
         const secondaryProfiles = userProfile.secondaryProfileIdList;
         for (var i = 0; i < secondaryProfiles.length; i++) {
             const profile = await Profile.findById(secondaryProfiles[i]);
-            const profileId = await profile.id;
             const profileName = profile.name;
-            allProfiles.push({"id": profileId, "name": profileName});
+            allProfiles.push({"id": profile.id, "name": profileName});
         }
     }
     return {"profile_list": allProfiles};
@@ -54,7 +53,7 @@ async function addProfile(userId, profileName) {
 
     const profile = new Profile({name: profileName});
     await profile.save();
-    userProfile.secondaryProfileIdList.push({"id": profile.id, "name": profileName})
+    userProfile.secondaryProfileIdList.push(profile.id);
     await userProfile.save()
 
     return {"id": profile.id, "name": profileName};

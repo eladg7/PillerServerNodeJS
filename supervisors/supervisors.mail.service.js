@@ -17,11 +17,10 @@ async function mailAllSupervisors() {
     //  get every user
     await User.find({}).stream()
         .on('data', async function (user, _) {
-            const userId=await user.id;
-            const threshold = (await getThreshold(userId)).threshold;
+            const threshold = (await getThreshold(user.id)).threshold;
             if (threshold > 0) {
-                const supervisors = await getConfirmedSupervisors(userId);
-                const drugList = (await getSpecificCalendar(userId,userId)).drug_info_list;
+                const supervisors = await getConfirmedSupervisors(user.id);
+                const drugList = (await getSpecificCalendar(user.id, user.id)).drug_info_list;
                 await sendMailAboutUser(drugList, user, supervisors, threshold);
             }
         })
@@ -71,10 +70,9 @@ function hasConsecutiveNotTaken(intakes) {
 }
 
 async function mailSupervisors(user, supervisors, drug, threshold) {
-    const userId=await user.id;
     for (let i = 0; i < supervisors.length; i++) {
         const unsubscribe_link = 'http://' + consts.serverConfig['IP'] + ':' + consts.serverConfig['PORT']
-            + "/supervisors/unsubscribe/" + userId + "/" + supervisors[i].supervisorEmail;
+            + "/supervisors/unsubscribe/" + user.id + "/" + supervisors[i].supervisorEmail;
         const message = "<p>Hello " + supervisors[i].supervisorName + "!<br>" + user.name + " didn't take " + drug.name
             + " for the past " + threshold + " days." + "<br> To unsubscribe from being " + user.name
             + "'s supervisor, press " + "<a href=" + unsubscribe_link + ">here</a> </p>";
