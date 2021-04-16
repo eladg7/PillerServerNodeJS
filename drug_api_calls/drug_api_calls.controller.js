@@ -6,7 +6,7 @@ const multer = require('multer');
 const upload = multer();
 
 router.get('/drugByName/:drugName', findDrugByName);
-router.get('/findInteractions/:email/:profileName/:newRxcui', findInteractions);
+router.get('/findInteractions/:userId/:profileId/:newRxcui', findInteractions);
 router.get('/getDrugImage', getDrugImage);
 //  user upload.single because we will receive amn image as multi-part
 router.post('/findDrugByImage', upload.single('file'), findDrugByImage);
@@ -27,7 +27,7 @@ function findDrugByName(req, res, next) {
 }
 
 function findInteractions(req, res, next) {
-    drugService.findInteractions(req.params.email, req.params.profileName, req.params.newRxcui)
+    drugService.findInteractions(req.params.userId, req.params.profileId, req.params.newRxcui)
         .then(result => res.json(result))
         .catch(err => next(err));
 }

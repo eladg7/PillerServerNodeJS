@@ -39,8 +39,8 @@ function getImageFromResult(result) {
     return imageSrc;
 }
 
-async function findInteractions(email, profileName, newRxcui) {
-    const drugList = (await calendarService.getByEmailAndName(email, profileName)).drug_info_list;
+async function findInteractions(userId, profileId, newRxcui) {
+    const drugList = (await calendarService.getSpecificCalendar(userId, profileId)).drug_info_list;
     let parsedInter = [];
     if (newRxcui !== "0") {
         const rxcuisJoined = [];
