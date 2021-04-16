@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const superviseService = require('../supervisors/supervisors.service');
 
-const profileService = require('../profile/profile.service');
+const profileService = require('../profile/profileList.service');
 
 
 const User = db.User;

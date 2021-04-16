@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+const {Profile} = require("../_helpers/db");
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    name: {type: String, required: true}
-
+    userId: {type: String, unique: true, required: true},
+    secondaryProfileList: [ {type: Profile, unique: true, required: true}]
 });
 
 schema.set('toJSON', {
@@ -14,4 +15,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Profile', schema);
+module.exports = mongoose.model('ProfileList', schema);
