@@ -9,7 +9,7 @@ const Drug = db.Drug;
 
 
 module.exports = {
-    getByEmailAndName,
+    getSpecificCalendar,
     add_new_drug,
     delete_drug,
     update_drug,
@@ -17,12 +17,12 @@ module.exports = {
     delete: _delete
 };
 
-async function getByEmailAndName(email, name) {
+async function getSpecificCalendar(userId, profileId) {
     const drugInfoList = [];
-    let calendar = await Calendar.findOne({email: email, name: name});
+    let calendar = await Calendar.findOne({userId: userId, profileId: profileId});
 
     if (!calendar) {
-        calendar = new Calendar({email: email, name: name, drugList: []});
+        calendar = new Calendar({userId: userId, profileId: profileId, drugList: []});
         await calendar.save();
     } else {
         const drugList = calendar.drugList;
@@ -61,8 +61,8 @@ async function getDrugObjectValues(drugId) {
     };
 }
 
-async function deleteFutureOccurrencesOfDrugByUser(email, name, drug_id, repeat_end) {
-    const calendar = await Calendar.findOne({email: email, name: name});
+async function deleteFutureOccurrencesOfDrugByUser(userId, profileId, drug_id, repeat_end) {
+    const calendar = await Calendar.findOne({userId: userId, profileId: profileId});
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
@@ -71,7 +71,7 @@ async function deleteFutureOccurrencesOfDrugByUser(email, name, drug_id, repeat_
             //  if the repeat end is before repeat start then just delete the drug
             const repeatEndAsInt = parseInt(repeat_end);
             if (repeatEndAsInt !== 0 && (repeatEndAsInt <= parseInt(occurrence.repeat_start))) {
-                await delete_drug(email, name, drug_id);
+                await delete_drug(userId, profileId, drug_id);
             } else {
                 occurrence.repeat_end = repeat_end;
                 await occurrence.save();
@@ -94,8 +94,8 @@ async function deleteFutureOccurrencesOfDrugByUser(email, name, drug_id, repeat_
     "repeat_weekday":2
 }
  */
-async function add_new_drug(email, profileName, new_drug_info) {
-    const calendar = await Calendar.findOne({email: email, name: profileName});
+async function add_new_drug(userId, profileId, new_drug_info) {
+    const calendar = await Calendar.findOne({userId: userId, profileId: profileId});
     if (!calendar) throw 'User\'s calendar not found';
     //const drugList = calendar.drugList;
     //if (doesDrugExists(drugList, new_drug_info.rxcui)) throw 'Drug already exists in calendar.';
@@ -159,13 +159,13 @@ async function createRefillForDrug(new_drug_info) {
     return await refill.id;
 }
 
-async function update_drug(email, name, drug_id, drug_info) {
-    const calendar = await delete_drug(email, name, drug_id, true);
+async function update_drug(userId, profileId, drug_id, drug_info) {
+    const calendar = await delete_drug(userId, profileId, drug_id, true);
     return await add_drug(calendar, drug_info);
 }
 
-async function delete_drug(email, name, drug_id, returnCalendar = false) {
-    const calendar = await Calendar.findOne({email: email, name: name});
+async function delete_drug(userId, profileId, drug_id, returnCalendar = false) {
+    const calendar = await Calendar.findOne({userId: userId, profileId: profileId});
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
     for (let i = 0; i < drugList.length; i++) {
@@ -182,8 +182,8 @@ async function delete_drug(email, name, drug_id, returnCalendar = false) {
     }
 }
 
-async function _delete(email, name) {
-    const calendar = await Calendar.findOne({email: email, name: name});
+async function _delete(userId, profileId) {
+    const calendar = await Calendar.findOne({userId: userId, profileId: profileId});
     // validate
     if (!calendar) throw 'User\'s calendar not found';
     const drugList = calendar.drugList;
@@ -193,7 +193,7 @@ async function _delete(email, name) {
         await deleteAllDrugObject(drugList[i]);
     }
 
-    await Calendar.deleteOne({email: email, name: name});
+    await Calendar.deleteOne({userId: userId, profileId: profileId});
 }
 
 
