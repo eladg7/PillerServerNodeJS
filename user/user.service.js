@@ -52,7 +52,7 @@ async function emailResetPassword(email) {
 async function create(userParam) {
     // validate
     if (await User.findOne({email: userParam.email})) {
-        throw 'Email "' + userParam.name + '" is already taken';
+        throw 'Email "' + userParam.email + '" is already taken';
     }
 
     const user = new User(userParam);

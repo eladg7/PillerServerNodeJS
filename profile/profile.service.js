@@ -25,12 +25,13 @@ async function initProfileList(email, profileName) {
 
 
 async function getAllProfiles(email) {
-    var profileList = [];
-    var userProfiles = await Profile.findOne({email: email})
+    const profileList = [];
+    const userProfiles = await Profile.findOne({email: email});
     profileList.push(userProfiles.mainProfile)
     if (userProfiles) {
         const profiles = userProfiles.secondaryProfileList;
         for (var i = 0; i < profiles.length; i++) {
+            //  todo add profile object with id
             const profile_name = profiles[i];
             profileList.push(profile_name);
         }
@@ -40,7 +41,7 @@ async function getAllProfiles(email) {
 
 
 async function addProfile(email, profileName) {
-    var userProfiles = await Profile.findOne({email: email})
+    const userProfiles = await Profile.findOne({email: email});
     if (!userProfiles) {
         throw 'Profiles does not exist.';
     }
