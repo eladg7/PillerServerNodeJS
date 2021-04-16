@@ -15,7 +15,7 @@ module.exports = {
 async function initProfileList(userId) {
     var userProfile = await ProfileList.findOne({userId: userId});
     if (!userProfile) {
-        userProfile = new ProfileList({userId: userId, secondaryProfileList: []})
+        userProfile = new ProfileList({userId: userId, secondaryProfileIdList: []})
         await userProfile.save()
     }
 }
@@ -28,7 +28,7 @@ async function getAllProfiles(userId) {
 
     const userProfile = await ProfileList.findOne({userId: userId});
     if (userProfile) {
-        const secondaryProfiles = userProfile.secondaryProfileList;
+        const secondaryProfiles = userProfile.secondaryProfileIdList;
         for (var i = 0; i < secondaryProfiles.length; i++) {
             const profileId = secondaryProfiles[i].id;
             const profileName = secondaryProfiles[i].name;
@@ -45,14 +45,14 @@ async function addProfile(userId, profileName) {
         throw 'Profiles does not exist.';
     }
     const mainProfileName = (await User.findById(userId)).mainProfileName;
-    if (isProfileNameExists(profileName, userProfile.secondaryProfileList) || mainProfileName === profileName) {
+    if (isProfileNameExists(profileName, userProfile.secondaryProfileIdList) || mainProfileName === profileName) {
         // exists in list
         throw 'Profile already exists.';
     }
 
     const profile = new Profile({name: profileName});
     await profile.save();
-    userProfile.secondaryProfileList.push({"id": profile.id, "name": profileName})
+    userProfile.secondaryProfileIdList.push({"id": profile.id, "name": profileName})
     await userProfile.save()
 
     return {"id": profile.id, "name": profileName};
@@ -72,9 +72,9 @@ function isProfileNameExists(profileName, secondaryProfiles) {
 async function deleteProfile(userId, profileId) {
     const userProfile = await ProfileList.findOne({userId: userId});
     if (userProfile) {
-        for (var i = 0; i < userProfile.secondaryProfileList.length; i++) {
-            if (userProfile.secondaryProfileList[i].id === profileId) {
-                userProfile.secondaryProfileList.splice(i, 1);
+        for (var i = 0; i < userProfile.secondaryProfileIdList.length; i++) {
+            if (userProfile.secondaryProfileIdList[i].id === profileId) {
+                userProfile.secondaryProfileIdList.splice(i, 1);
                 try {
                     // the profile may not have a calendar yet
                     await calendarService.delete(userId, profileId);
@@ -93,10 +93,10 @@ async function deleteAllProfiles(userId) {
     if (userProfile) {
         await calendarService.delete(userId, userId);
 
-        for (let i = 0; i < userProfile.secondaryProfileList.length; i++) {
+        for (let i = 0; i < userProfile.secondaryProfileIdList.length; i++) {
             try {
                 // the profile may not have a calendar yet
-                await calendarService.delete(userId, userProfile.secondaryProfileList[i].id);
+                await calendarService.delete(userId, userProfile.secondaryProfileIdList[i].id);
             } catch (e) {
                 console.error(e);
             }
