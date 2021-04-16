@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const {Profile} = require("../_helpers/db");
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
     userId: {type: String, unique: true, required: true},
-    secondaryProfileIdList: [{type: String, unique: true, required: true}]
+    secondaryProfileIdList: [{type: String, required: true}]
 });
 
 schema.set('toJSON', {

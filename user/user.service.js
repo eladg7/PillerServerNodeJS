@@ -26,13 +26,14 @@ async function authenticate({email, password}) {
     const user = await User.findOne({email});
     if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign({sub: user.id}, config.secret, {expiresIn: '7d'});
+        const profileName = (await Profile.findById(user.profileId)).name;
         return {
             ...user.toJSON(),
-            token
+            token,
+            "profileId": user.profileId,
+            "profileName": profileName
         };
     }
-    const profileName= (await Profile.findById(user.profileId)).name;
-    return {"id": user.profileId, "name": profileName};
 }
 
 async function emailResetPassword(email) {
@@ -47,7 +48,7 @@ async function emailResetPassword(email) {
     user.password = bcrypt.hashSync(newPassword, 10);
     await user.save();
     sendMailHTML([user.email], 'Password Reset For Piller',
-        "<p>Your password was reset in Piller, your new password is:<br>" + newPassword+"</p>")
+        "<p>Your password was reset in Piller, your new password is:<br>" + newPassword + "</p>")
 }
 
 
@@ -63,13 +64,13 @@ async function createNewUser(userParam) {
     }
     // save user
     await user.save();
-    user.profileId =await createProfileForMainProfile(user.id, userParam.mainProfileNmae);
+    user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
     await user.save();
 }
 
-async function createProfileForMainProfile(userId,profileName){
+async function createProfileForMainProfile(userId, profileName) {
     await ProfileListService.initProfileList(userId);
-    const profile = await ProfileListService.addProfile(userId,profileName);
+    const profile = await ProfileListService.addProfile(userId, profileName);
     return profile.id;
 }
 
