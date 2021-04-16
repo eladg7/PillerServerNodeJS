@@ -23,7 +23,8 @@ async function initProfileList(userId) {
 
 async function getAllProfiles(userId) {
     const allProfiles = [];
-    const mainProfileName = (await User.findById(userId)).mainProfileName;
+    const mainProfileId = (await User.findById(userId)).profileId;
+    const mainProfileName = (await Profile.findById(mainProfileId)).name;
     allProfiles.push({"id": userId, "name": mainProfileName});
 
     const userProfile = await ProfileList.findOne({userId: userId});
@@ -44,11 +45,14 @@ async function addProfile(userId, profileName) {
     if (!userProfile) {
         throw 'Profiles does not exist.';
     }
-    const mainProfileName = (await User.findById(userId)).mainProfileName;
-    const isProfileAlreadyInList=await isProfileNameExists(profileName, userProfile.secondaryProfileIdList);
-    if ( isProfileAlreadyInList || mainProfileName === profileName) {
-        // exists in list
-        throw 'Profile already exists.';
+    const mainProfileId = (await User.findById(userId)).profileId;
+    if (mainProfileId) {
+        const mainProfileName = (await Profile.findById(mainProfileId)).name;
+        const isProfileAlreadyInList = await isProfileNameExists(profileName, userProfile.secondaryProfileIdList);
+        if (isProfileAlreadyInList || mainProfileName === profileName) {
+            // exists in list
+            throw 'Profile already exists.';
+        }
     }
 
     const profile = new Profile({name: profileName});
