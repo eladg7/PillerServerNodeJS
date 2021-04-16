@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     userId: {type: String, unique: true, required: true},
-    secondaryProfileList: [ {type: Profile, unique: true, required: true}]
+    secondaryProfileIdList: [{type: String, unique: true, required: true}]
 });
 
 schema.set('toJSON', {
