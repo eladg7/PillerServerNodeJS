@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const superviseService = require('../supervisors/supervisors.service');
-
-const profileService = require('../profile/profileList.service');
+const Profile = require('../profile/profile.model');
+const ProfileListService = require('../profile/profileList.service');
 
 
 const User = db.User;
@@ -15,7 +15,7 @@ const resetPasswordLength = 7;
 
 module.exports = {
     authenticate,
-    create,
+    create: createNewUser,
     update,
     updatePassword,
     delete: _delete,
@@ -31,6 +31,8 @@ async function authenticate({email, password}) {
             token
         };
     }
+    const profileName= (await Profile.findById(user.profileId)).name;
+    return {"id": user.profileId, "name": profileName};
 }
 
 async function emailResetPassword(email) {
@@ -49,21 +51,26 @@ async function emailResetPassword(email) {
 }
 
 
-async function create(userParam) {
+async function createNewUser(userParam) {
     // validate
     if (await User.findOne({email: userParam.email})) {
         throw 'Email "' + userParam.email + '" is already taken';
     }
-
     const user = new User(userParam);
-
     // hash password
     if (userParam.password) {
         user.password = bcrypt.hashSync(userParam.password, 10);
     }
-
     // save user
     await user.save();
+    user.profileId =await createProfileForMainProfile(user.id, userParam.mainProfileNmae);
+    await user.save();
+}
+
+async function createProfileForMainProfile(userId,profileName){
+    await ProfileListService.initProfileList(userId);
+    const profile = await ProfileListService.addProfile(userId,profileName);
+    return profile.id;
 }
 
 async function updatePassword(email, userParam) {
@@ -108,7 +115,7 @@ async function update(email, userParam) {
 
 async function _delete(email) {
     //delete profiles (calenders + occurence+intakedate)
-    profileService.deleteAllProfiles(email)
+    ProfileListService.deleteAllProfiles(email)
     //delete supervisors
     superviseService.deleteSupervisorList(email)
 
