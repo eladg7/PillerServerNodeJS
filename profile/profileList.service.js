@@ -23,10 +23,6 @@ async function initProfileList(userId) {
 
 async function getAllProfiles(userId) {
     const allProfiles = [];
-    const mainProfileId = (await User.findById(userId)).profileId;
-    const mainProfileName = (await Profile.findById(mainProfileId)).name;
-    allProfiles.push({"id": userId, "name": mainProfileName});
-
     const userProfile = await ProfileList.findOne({userId: userId});
     if (userProfile) {
         const secondaryProfiles = userProfile.secondaryProfileIdList;
