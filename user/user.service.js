@@ -16,7 +16,7 @@ const resetPasswordLength = 7;
 module.exports = {
     authenticate,
     create: createNewUser,
-    update,
+    updateEmail,
     updatePassword,
     delete: _delete,
     emailResetPassword
@@ -74,11 +74,11 @@ async function createProfileForMainProfile(userId, profileName) {
     return profile.id;
 }
 
-async function updatePassword(email, userParam) {
-    const user = await User.findOne({email: email});
+async function updatePassword(userId, userParam) {
+    const user = await User.findById(userId);
 
     // validate
-    if (!user) throw 'User ' + email + ' not found';
+    if (!user) throw 'User ' + userParam.email + ' not found';
     const userData = userParam.nameValuePairs
     if (!bcrypt.compareSync(userData.oldPassword, user.password)) {
         throw 'Wrong password';
@@ -94,11 +94,11 @@ async function updatePassword(email, userParam) {
     await user.save();
 }
 
-async function update(email, userParam) {
-    const user = await User.findOne({email: email});
+async function updateEmail(userId, userParam) {
+    const user = await User.findById(userId);
 
     // validate
-    if (!user) throw 'User ' + email + ' not found';
+    if (!user) throw 'User ' + userParam.email + ' not found';
     if (user.email !== userParam.email && await User.findOne({email: userParam.email})) {
         throw 'Email "' + userParam.email + '" is already taken';
     }
