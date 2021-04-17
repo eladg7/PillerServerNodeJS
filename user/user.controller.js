@@ -6,8 +6,8 @@ const userService = require('./user.service');
 router.get('/resetPassword/:email', emailResetPassword);
 router.post('/authenticate', authenticate);
 router.post('/register', register);
-router.put('/:email', update);
-router.put('/updatePassword/:email', updatePassword);
+router.put('/:userId', updateEmail);
+router.put('/updatePassword/:userId', updatePassword);
 router.delete('/:email', _delete);
 
 module.exports = router;
@@ -31,13 +31,13 @@ function register(req, res, next) {
 }
 
 function updatePassword(req, res, next) {
-    userService.updatePassword(req.params.email, req.body)
+    userService.updatePassword(req.params.userId, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
 
-function update(req, res, next) {
-    userService.update(req.params.email, req.body)
+function updateEmail(req, res, next) {
+    userService.updateEmail(req.params.userId, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
