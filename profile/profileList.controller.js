@@ -5,7 +5,7 @@ const profileService = require('./profileList.service');
 // routes
 router.get('/:userId', getAllProfiles);
 router.post('/:userId', initProfileList);
-router.put('/:userId/:name', addProfile);
+router.put('/:userId/:name/:relation', addProfile);
 router.delete('/:userId/:profileId', deleteProfile);
 router.delete('/:userId', deleteAllProfiles);
 
@@ -25,7 +25,7 @@ function getAllProfiles(req, res, next) {
 }
 
 function addProfile(req, res, next) {
-    profileService.addProfile(req.params.userId, req.params.name)
+    profileService.addProfile(req.params.userId, req.params.name,req.params.relation)
         .then(profiles => res.json(profiles))
         .catch(err => next(err));
 }

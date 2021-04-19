@@ -18,7 +18,7 @@ function sendMailHTML(to,subject,htmlText){
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
-            throw error;
+            //throw error;
         } else {
             console.log('Email send: ' + info.response)
         }
