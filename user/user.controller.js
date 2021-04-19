@@ -6,6 +6,8 @@ const userService = require('./user.service');
 router.get('/resetPassword/:email', emailResetPassword);
 router.post('/authenticate', authenticate);
 router.post('/register', register);
+router.post('/:userId', updateEmailUsernamePassword);
+
 router.put('/:userId', updateEmail);
 router.put('/updatePassword/:userId', updatePassword);
 router.delete('/:email', _delete);
@@ -30,6 +32,13 @@ function register(req, res, next) {
         .catch(err => next(err));
 }
 
+function updateEmailUsernamePassword(req, res, next) {
+    userService.updateEmailUsernamePassword(req.params.userId, req.body)
+        .then(() => res.json({}))
+        .catch(err => next(err));
+}
+
+
 function updatePassword(req, res, next) {
     userService.updatePassword(req.params.userId, req.body)
         .then(() => res.json({}))
@@ -38,6 +47,12 @@ function updatePassword(req, res, next) {
 
 function updateEmail(req, res, next) {
     userService.updateEmail(req.params.userId, req.body)
+        .then(() => res.json({}))
+        .catch(err => next(err));
+}
+
+function updateUsername(req, res, next) {
+    userService.updateUsername(req.params.userId, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }

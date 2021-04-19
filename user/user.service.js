@@ -15,6 +15,7 @@ const resetPasswordLength = 7;
 
 module.exports = {
     authenticate,
+    updateEmailUsernamePassword,
     create: createNewUser,
     updateEmail,
     updatePassword,
@@ -74,25 +75,41 @@ async function createProfileForMainProfile(userId, profileName) {
     return profile.id;
 }
 
-async function updatePassword(userId, userParam) {
+async function updateEmailUsernamePassword(userId, userParam) {
     const user = await User.findById(userId);
-
     // validate
     if (!user) throw 'User ' + userParam.email + ' not found';
-    const userData = userParam.nameValuePairs
-    if (!bcrypt.compareSync(userData.oldPassword, user.password)) {
+    if (!bcrypt.compareSync(userParam.oldPassword, user.password)) {
         throw 'Wrong password';
     }
 
     // hash password if it was entered
-    if (userData.password) {
-        userData.password = bcrypt.hashSync(userData.password, 10);
+    if (userParam.password) {
+        userParam.password = bcrypt.hashSync(userParam.password, 10);
     }
-    // copy userParam properties to user
-    Object.assign(user, userData);
-
+    user.password = userParam.password;
+    user.email = userParam.email;
     await user.save();
+    const profile= await Profile.findById(user.profileId);
+    if (!profile) {
+        throw 'Profile for user does no exist.';
+    }
+    profile.name=userParam.mainProfileName;
+    await profile.save();
 }
+
+async function _delete(email) {
+    //delete profiles (calenders + occurence+intakedate)
+    ProfileListService.deleteAllProfiles(email)
+    //delete supervisors
+    superviseService.deleteSupervisorList(email)
+
+
+    await User.deleteOne({email: email});
+}
+
+
+
 
 async function updateEmail(userId, userParam) {
     const user = await User.findById(userId);
@@ -114,12 +131,20 @@ async function updateEmail(userId, userParam) {
     await user.save();
 }
 
-async function _delete(email) {
-    //delete profiles (calenders + occurence+intakedate)
-    ProfileListService.deleteAllProfiles(email)
-    //delete supervisors
-    superviseService.deleteSupervisorList(email)
+async function updatePassword(userId, userParam) {
+    const user = await User.findById(userId);
+    // validate
+    if (!user) throw 'User ' + userParam.email + ' not found';
+    if (!bcrypt.compareSync(userParam.oldPassword, user.password)) {
+        throw 'Wrong password';
+    }
 
+    // hash password if it was entered
+    if (userData.password) {
+        userData.password = bcrypt.hashSync(userData.password, 10);
+    }
+    // copy userParam properties to user
+    Object.assign(user, userData);
 
-    await User.deleteOne({email: email});
+    await user.save();
 }
