@@ -8,9 +8,9 @@ router.post('/authenticate', authenticate);
 router.post('/register', register);
 router.post('/:userId', updateEmailUsernamePassword);
 
-router.put('/:userId', updateEmail);
-router.put('/updatePassword/:userId', updatePassword);
-router.delete('/:email', _delete);
+// router.put('/:userId', updateEmail);
+// router.put('/updatePassword/:userId', updatePassword);
+router.delete('/:userId', deleteUser);
 
 module.exports = router;
 
@@ -27,7 +27,7 @@ function authenticate(req, res, next) {
 }
 
 function register(req, res, next) {
-    userService.create(req.body)
+    userService.createNewUser(req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
@@ -39,26 +39,21 @@ function updateEmailUsernamePassword(req, res, next) {
 }
 
 
-function updatePassword(req, res, next) {
-    userService.updatePassword(req.params.userId, req.body)
-        .then(() => res.json({}))
-        .catch(err => next(err));
-}
+// function updatePassword(req, res, next) {
+//     userService.updatePassword(req.params.userId, req.body)
+//         .then(() => res.json({}))
+//         .catch(err => next(err));
+// }
+//
+// function updateEmail(req, res, next) {
+//     userService.updateEmail(req.params.userId, req.body)
+//         .then(() => res.json({}))
+//         .catch(err => next(err));
+// }
 
-function updateEmail(req, res, next) {
-    userService.updateEmail(req.params.userId, req.body)
-        .then(() => res.json({}))
-        .catch(err => next(err));
-}
 
-function updateUsername(req, res, next) {
-    userService.updateUsername(req.params.userId, req.body)
-        .then(() => res.json({}))
-        .catch(err => next(err));
-}
-
-function _delete(req, res, next) {
-    userService.delete(req.params.email)
+function deleteUser(req, res, next) {
+    userService.deleteUser(req.params.userId,req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
