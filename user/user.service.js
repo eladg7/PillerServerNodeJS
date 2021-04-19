@@ -16,10 +16,8 @@ const resetPasswordLength = 7;
 module.exports = {
     authenticate,
     updateEmailUsernamePassword,
-    create: createNewUser,
-    updateEmail,
-    updatePassword,
-    delete: _delete,
+    createNewUser,
+    deleteUser,
     emailResetPassword
 };
 
@@ -79,9 +77,7 @@ async function updateEmailUsernamePassword(userId, userParam) {
     const user = await User.findById(userId);
     // validate
     if (!user) throw 'User ' + userParam.email + ' not found';
-    if (!bcrypt.compareSync(userParam.oldPassword, user.password)) {
-        throw 'Wrong password';
-    }
+    checkPasswordValidation(userParam.password,user)
 
     // hash password if it was entered
     if (userParam.password) {
@@ -98,53 +94,63 @@ async function updateEmailUsernamePassword(userId, userParam) {
     await profile.save();
 }
 
-async function _delete(email) {
+async function deleteUser(userId,userParam) {
+    const user = await User.findById(userId);
+    // validate
+    if (!user) throw 'User ' + userId + ' not found';
+    checkPasswordValidation(userParam.password,user)
+
     //delete profiles (calenders + occurence+intakedate)
-    ProfileListService.deleteAllProfiles(email)
+    await ProfileListService.deleteAllProfiles(userId)
     //delete supervisors
-    superviseService.deleteSupervisorList(email)
+    await superviseService.deleteSupervisorList(userId)
 
 
-    await User.deleteOne({email: email});
+    await User.findByIdAndDelete(userId);
 }
 
-
-
-
-async function updateEmail(userId, userParam) {
-    const user = await User.findById(userId);
-
-    // validate
-    if (!user) throw 'User ' + userParam.email + ' not found';
-    if (user.email !== userParam.email && await User.findOne({email: userParam.email})) {
-        throw 'Email "' + userParam.email + '" is already taken';
-    }
-
-    // hash password if it was entered
-    if (userParam.password) {
-        userParam.password = bcrypt.hashSync(userParam.password, 10);
-    }
-
-    // copy userParam properties to user
-    Object.assign(user, userParam);
-
-    await user.save();
-}
-
-async function updatePassword(userId, userParam) {
-    const user = await User.findById(userId);
-    // validate
-    if (!user) throw 'User ' + userParam.email + ' not found';
-    if (!bcrypt.compareSync(userParam.oldPassword, user.password)) {
+function checkPasswordValidation(password,user){
+    if (!bcrypt.compareSync(password, user.password)) {
         throw 'Wrong password';
     }
-
-    // hash password if it was entered
-    if (userData.password) {
-        userData.password = bcrypt.hashSync(userData.password, 10);
-    }
-    // copy userParam properties to user
-    Object.assign(user, userData);
-
-    await user.save();
 }
+
+
+
+// async function updateEmail(userId, userParam) {
+//     const user = await User.findById(userId);
+//
+//     // validate
+//     if (!user) throw 'User ' + userParam.email + ' not found';
+//     if (user.email !== userParam.email && await User.findOne({email: userParam.email})) {
+//         throw 'Email "' + userParam.email + '" is already taken';
+//     }
+//
+//     // hash password if it was entered
+//     if (userParam.password) {
+//         userParam.password = bcrypt.hashSync(userParam.password, 10);
+//     }
+//
+//     // copy userParam properties to user
+//     Object.assign(user, userParam);
+//
+//     await user.save();
+// }
+//
+// async function updatePassword(userId, userParam) {
+//     const user = await User.findById(userId);
+//     // validate
+//     if (!user) throw 'User ' + userParam.email + ' not found';
+//     if (!bcrypt.compareSync(userParam.oldPassword, user.password)) {
+//         throw 'Wrong password';
+//     }
+//
+//     // hash password if it was entered
+//     if (userData.password) {
+//         userData.password = bcrypt.hashSync(userData.password, 10);
+//     }
+//     // copy userParam properties to user
+//     Object.assign(user, userData);
+//
+//     await user.save();
+// }

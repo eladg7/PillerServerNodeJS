@@ -94,14 +94,12 @@ async function deleteProfile(userId, profileId) {
 async function deleteAllProfiles(userId) {
     const userProfile = await ProfileList.findOne({userId: userId});
     if (userProfile) {
-        await calendarService.delete(userId, userId);
-
-        for (let i = 0; i < userProfile.secondaryProfileIdList.length; i++) {
+        for (var i = 0; i < userProfile.secondaryProfileIdList.length; i++) {
+            const profile = await Profile.findById(userProfile.secondaryProfileIdList[i]);
+            await Profile.findByIdAndDelete(profile.id);
             try {
-                const profile = await Profile.findById(userProfile.secondaryProfileIdList[i]);
                 // the profile may not have a calendar yet
                 await calendarService.delete(userId, profile.id);
-                await Profile.findByIdAndDelete(profileId);
             } catch (e) {
                 console.error(e);
             }
