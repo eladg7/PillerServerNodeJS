@@ -70,7 +70,7 @@ async function createNewUser(userParam) {
 
 async function createProfileForMainProfile(userId, profileName) {
     await ProfileListService.initProfileList(userId);
-    const profile = await ProfileListService.addProfile(userId, profileName);
+    const profile = await ProfileListService.addProfile(userId, profileName,"main-user");
     return profile.id;
 }
 
