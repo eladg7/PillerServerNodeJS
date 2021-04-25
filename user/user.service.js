@@ -19,7 +19,6 @@ module.exports = {
     createNewUser,
     deleteUser,
     emailResetPassword,
-    createProfileForMainProfile,
     deleteGoogleUser,
     getGoogleAccount
 };
@@ -43,7 +42,7 @@ async function getGoogleAccount(userParam) {
         user = new User(userParam);
         // save user
         await user.save();
-        user.profileId = await User.createProfileForMainProfile(user.id, userParam.mainProfileName);
+        user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
         await user.save();
     }
 
@@ -60,7 +59,7 @@ async function getGoogleAccount(userParam) {
 
 async function authenticate({email, password}) {
     const user = await User.findOne({email});
-    if (user && bcrypt.compareSync(password, user.password)) {
+    if (user  && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign({sub: user.id}, config.secret, {expiresIn: '7d'});
         const profileName = (await Profile.findById(user.profileId)).name;
         return {
@@ -95,7 +94,7 @@ async function createNewUser(userParam) {
     if (user && user.password !== "") {
         //user already exists with password
         throw 'Email "' + userParam.email + '" is already taken';
-    }else{
+    }else if( !user ) {
         user = new User(userParam);
         await user.save();
         user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
