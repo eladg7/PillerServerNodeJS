@@ -35,7 +35,7 @@ async function getAllProfiles(userId) {
 }
 
 
-async function addProfile(userId, profileName, relation) {
+async function addProfile(userId, profileBody) {
     const userProfile = await ProfileList.findOne({userId: userId});
     if (!userProfile) {
         throw 'Profiles does not exist.';
@@ -43,19 +43,20 @@ async function addProfile(userId, profileName, relation) {
     const mainProfileId = (await User.findById(userId)).profileId;
     if (mainProfileId) {
         const mainProfileName = (await Profile.findById(mainProfileId)).name;
-        const isProfileAlreadyInList = await isProfileNameExists(profileName, userProfile.secondaryProfileIdList);
-        if (isProfileAlreadyInList || mainProfileName === profileName) {
+        const isProfileAlreadyInList = await isProfileNameExists(
+            profileBody.name, userProfile.secondaryProfileIdList);
+        if (isProfileAlreadyInList || mainProfileName === profileBody.name) {
             // exists in list
             throw 'Profile already exists.';
         }
     }
 
-    const profile = new Profile({name: profileName,relation: relation});
+    const profile = new Profile({name: profileBody.name, relation: profileBody.relation});
     await profile.save();
     userProfile.secondaryProfileIdList.push(profile.id);
     await userProfile.save()
 
-    return {"id": profile.id, "name": profileName, "relation": relation};
+    return {"id": profile.id, "name": profileBody.name, "relation": profileBody.relation};
 }
 
 async function isProfileNameExists(profileName, secondaryProfiles) {
