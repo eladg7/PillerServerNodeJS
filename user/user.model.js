@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     profileId: {type: String, required: false},
-    password: {type: String, required: true},
+    password: {type: String, required: false},
     email: {type: String, unique: true, required: true},
     createdDate: {type: Date, default: Date.now}
 });
