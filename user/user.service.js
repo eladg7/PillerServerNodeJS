@@ -18,8 +18,45 @@ module.exports = {
     updateEmailUsernamePassword,
     createNewUser,
     deleteUser,
-    emailResetPassword
+    emailResetPassword,
+    createProfileForMainProfile,
+    deleteGoogleUser,
+    getGoogleAccount
 };
+
+
+async function deleteGoogleUser(userId) {
+    const user = await User.findById(userId);
+    // validate
+    if (!user) throw 'User ' + userId + ' not found';
+
+    //delete profiles (calenders + occurence+intakedate)
+    await ProfileListService.deleteAllProfiles(userId)
+    //delete supervisors
+    await superviseService.deleteSupervisorList(userId)
+    await User.findByIdAndDelete(userId);
+}
+
+async function getGoogleAccount(userParam) {
+    let user = await User.findOne({email: userParam.email});
+    if (!user) {
+        user = new User(userParam);
+        // save user
+        await user.save();
+        user.profileId = await User.createProfileForMainProfile(user.id, userParam.mainProfileName);
+        await user.save();
+    }
+
+    const profileName = (await Profile.findById(user.profileId)).name;
+    return {
+        ...user.toJSON(),
+        "profileId": user.profileId,
+        "profileName": profileName,
+        "googleUser":true
+    };
+}
+
+
 
 async function authenticate({email, password}) {
     const user = await User.findOne({email});
@@ -30,7 +67,8 @@ async function authenticate({email, password}) {
             ...user.toJSON(),
             token,
             "profileId": user.profileId,
-            "profileName": profileName
+            "profileName": profileName,
+            "googleUser":false
         };
     }
 }
@@ -53,17 +91,20 @@ async function emailResetPassword(email) {
 
 async function createNewUser(userParam) {
     // validate
-    if (await User.findOne({email: userParam.email})) {
+    let user=await User.findOne({email: userParam.email})
+    if (user && user.password !== "") {
+        //user already exists with password
         throw 'Email "' + userParam.email + '" is already taken';
+    }else{
+        user = new User(userParam);
+        await user.save();
+        user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
     }
-    const user = new User(userParam);
     // hash password
     if (userParam.password) {
         user.password = bcrypt.hashSync(userParam.password, 10);
     }
     // save user
-    await user.save();
-    user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
     await user.save();
 }
 
@@ -114,6 +155,7 @@ function checkPasswordValidation(password,user){
         throw 'Wrong password';
     }
 }
+
 
 
 
