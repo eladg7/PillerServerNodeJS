@@ -7,12 +7,12 @@ router.get('/resetPassword/:email', emailResetPassword);
 router.post('/authenticate', authenticate);
 router.post('/register', register);
 router.post('/:userId', updateEmailUsernamePassword);
-
-// router.put('/:userId', updateEmail);
-// router.put('/updatePassword/:userId', updatePassword);
 router.delete('/:userId', deleteUser);
 
+router.post('/googleUser/getGoogleAccount', getGoogleAccount);
+router.delete('/googleUser/:userId', deleteUser);
 module.exports = router;
+
 
 function emailResetPassword(req, res, next) {
     userService.emailResetPassword(req.params.email)
@@ -39,21 +39,22 @@ function updateEmailUsernamePassword(req, res, next) {
 }
 
 
-// function updatePassword(req, res, next) {
-//     userService.updatePassword(req.params.userId, req.body)
-//         .then(() => res.json({}))
-//         .catch(err => next(err));
-// }
-//
-// function updateEmail(req, res, next) {
-//     userService.updateEmail(req.params.userId, req.body)
-//         .then(() => res.json({}))
-//         .catch(err => next(err));
-// }
-
-
 function deleteUser(req, res, next) {
     userService.deleteUser(req.params.userId,req.body)
+        .then(() => res.json({}))
+        .catch(err => next(err));
+}
+
+
+function getGoogleAccount(req, res, next) {
+    userService.getGoogleAccount(req.body)
+        .then(user => res.json(user))
+        .catch(err => next(err));
+}
+
+
+function deleteGoogleUser(req, res, next) {
+    userService.deleteGoogleUser(req.params.userId)
         .then(() => res.json({}))
         .catch(err => next(err));
 }
