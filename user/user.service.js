@@ -51,15 +51,14 @@ async function getGoogleAccount(userParam) {
         ...user.toJSON(),
         "profileId": user.profileId,
         "profileName": profileName,
-        "googleUser":true
+        "googleUser": true
     };
 }
 
 
-
 async function authenticate({email, password}) {
     const user = await User.findOne({email});
-    if (user  && bcrypt.compareSync(password, user.password)) {
+    if (user && bcrypt.compareSync(password, user.password)) {
         const token = jwt.sign({sub: user.id}, config.secret, {expiresIn: '7d'});
         const profileName = (await Profile.findById(user.profileId)).name;
         return {
@@ -67,7 +66,7 @@ async function authenticate({email, password}) {
             token,
             "profileId": user.profileId,
             "profileName": profileName,
-            "googleUser":false
+            "googleUser": false
         };
     }
 }
@@ -90,11 +89,11 @@ async function emailResetPassword(email) {
 
 async function createNewUser(userParam) {
     // validate
-    let user=await User.findOne({email: userParam.email})
+    let user = await User.findOne({email: userParam.email})
     if (user && user.password !== "") {
         //user already exists with password
         throw 'Email "' + userParam.email + '" is already taken';
-    }else if( !user ) {
+    } else if (!user) {
         user = new User(userParam);
         await user.save();
         user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
@@ -109,7 +108,8 @@ async function createNewUser(userParam) {
 
 async function createProfileForMainProfile(userId, profileName) {
     await ProfileListService.initProfileList(userId);
-    const profile = await ProfileListService.addProfile(userId, profileName,"main-user");
+    let profileBody = {name: profileName, relation: "main-user"};
+    const profile = await ProfileListService.addProfile(userId, profileBody);
     return profile.id;
 }
 
@@ -117,7 +117,7 @@ async function updateEmailUsernamePassword(userId, userParam) {
     const user = await User.findById(userId);
     // validate
     if (!user) throw 'User ' + userParam.email + ' not found';
-    checkPasswordValidation(userParam.password,user)
+    checkPasswordValidation(userParam.oldPassword, user)
 
     // hash password if it was entered
     if (userParam.password) {
@@ -126,19 +126,19 @@ async function updateEmailUsernamePassword(userId, userParam) {
     user.password = userParam.password;
     user.email = userParam.email;
     await user.save();
-    const profile= await Profile.findById(user.profileId);
+    const profile = await Profile.findById(user.profileId);
     if (!profile) {
         throw 'Profile for user does no exist.';
     }
-    profile.name=userParam.mainProfileName;
+    profile.name = userParam.mainProfileName;
     await profile.save();
 }
 
-async function deleteUser(userId,userParam) {
+async function deleteUser(userId, userParam) {
     const user = await User.findById(userId);
     // validate
     if (!user) throw 'User ' + userId + ' not found';
-    checkPasswordValidation(userParam.password,user)
+    checkPasswordValidation(userParam.password, user)
 
     //delete profiles (calenders + occurence+intakedate)
     await ProfileListService.deleteAllProfiles(userId)
@@ -149,13 +149,11 @@ async function deleteUser(userId,userParam) {
     await User.findByIdAndDelete(userId);
 }
 
-function checkPasswordValidation(password,user){
+function checkPasswordValidation(password, user) {
     if (!bcrypt.compareSync(password, user.password)) {
         throw 'Wrong password';
     }
 }
-
-
 
 
 // async function updateEmail(userId, userParam) {
