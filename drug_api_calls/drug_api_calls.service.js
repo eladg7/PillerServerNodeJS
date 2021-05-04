@@ -20,10 +20,7 @@ module.exports = {
 async function getDrugImage(rxcui) {
     let imageSrc = "";
     if (rxcui !== "0") {
-        const options = {
-            uri: 'https://rximage.nlm.nih.gov/api/rximage/1/rxnav?rxcui=' + rxcui,
-            json: true
-        };
+        const options = buildRequestOptions(true, 'https://rximage.nlm.nih.gov/api/rximage/1/rxnav?rxcui=' + rxcui);
         const result = await requestPromise(options);
         imageSrc = getImageFromResult(result);
     }
@@ -53,10 +50,7 @@ async function findInteractions(userId, profileId, newRxcui) {
             }
         }
         if (rxcuisJoined.length > 1) {
-            const options = {
-                uri: 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'),
-                json: true
-            };
+            const options = buildRequestOptions(true, 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'));
             const result = await requestPromise(options);
             parsedInter = parseInteraction(result, newRxcui);
         }
@@ -64,21 +58,52 @@ async function findInteractions(userId, profileId, newRxcui) {
     return parsedInter;
 }
 
+function buildRequestOptions(isJson, uri, properties = {}) {
+    //  Object.assign merges two dictionaries
+    return Object.assign({}, {
+        uri: uri,
+        json: isJson
+    }, properties);
+}
+
+function getDrugSearchByImageURI(properties) {
+    let baseUrl = "https://rximage.nlm.nih.gov/api/rximage/1/rxnav";
+    let isFirst = true;
+    for (const [key, value] of Object.entries(properties)) {
+        if (isFirst) {
+            isFirst = false;
+            baseUrl += "?" + key + "=" + value;
+        } else {
+            baseUrl += "&" + key + "=" + value;
+        }
+    }
+    return baseUrl;
+}
+
+async function getDrugsByProperties(properties) {
+    let options = buildRequestOptions(true, getDrugSearchByImageURI(properties));
+    const drugsProperties = await requestPromise(options);
+    return getDrugsFromConceptProperties(drugsProperties.nlmRxImages);
+}
+
 async function findDrugByImage(file) {
+    let drugs = [];
     if (file !== undefined && file.buffer !== undefined) {
-        const options = {
+        const options = buildRequestOptions(true, 'http://127.0.0.1:5000/drugByImage', {
             method: 'POST',
-            uri: 'http://127.0.0.1:5000/drugByImage',
             body: {
                 file: file.buffer
-            },
-            json: true
-        };
+            }
+        });
 
         const result = await requestPromise(options);
-        //  todo send request to api with the properties
+        //  send request only if the ML detected properties
+        if (Object.keys(result).length > 0) {
+            drugs = getDrugsByProperties(result);
+        }
     }
-    return {};
+    return drugs;
+
     //  todo delete next line (and the function) i left it here only so you will be able to see the image that
     //  the user sent
     // saveImage('iamge.jpg', file.buffer);
@@ -100,13 +125,11 @@ function saveImage(filename, data) {
 
 async function findDrugByName(drugName) {
     //const parsedDrugName=drugName.replace(/ /g,"+");
-    const options = {
-        uri: 'https://rxnav.nlm.nih.gov/REST/drugs',
+    const options = buildRequestOptions(false, 'https://rxnav.nlm.nih.gov/REST/drugs', {
         qs: {
             name: drugName
-        },
-        json: false
-    };
+        }
+    });
 
     const result = await requestPromise(options);
     let parsedResult = null;
@@ -124,8 +147,8 @@ function parseInteraction(interactionResult, newRxcui) {
     const result = [];
     if (interactionResult.fullInteractionTypeGroup !== undefined) {
         //there are interactions
-        var interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
-        for (var i = 0; i < interactionsType.length; i++) {
+        let interactionsType = interactionResult.fullInteractionTypeGroup[0].fullInteractionType; // in [0] is from drugBank, in [1] frm ONCHigh
+        for (let i = 0; i < interactionsType.length; i++) {
             //notify interaction with the new drug only
             if (interactionsType[i].minConcept[0].rxcui == newRxcui) {
                 // push the first interaction drug
