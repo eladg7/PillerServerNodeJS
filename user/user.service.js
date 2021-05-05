@@ -18,42 +18,10 @@ module.exports = {
     updateEmailUsernamePassword,
     createNewUser,
     deleteUser,
-    emailResetPassword,
-    deleteGoogleUser,
-    getGoogleAccount
+    emailResetPassword
+    // deleteGoogleUser,
+    // getGoogleAccount
 };
-
-
-async function deleteGoogleUser(userId) {
-    const user = await User.findById(userId);
-    // validate
-    if (!user) throw 'User ' + userId + ' not found';
-
-    //delete profiles (calenders + occurence+intakedate)
-    await ProfileListService.deleteAllProfiles(userId)
-    //delete supervisors
-    await superviseService.deleteSupervisorList(userId)
-    await User.findByIdAndDelete(userId);
-}
-
-async function getGoogleAccount(userParam) {
-    let user = await User.findOne({email: userParam.email});
-    if (!user) {
-        user = new User(userParam);
-        // save user
-        await user.save();
-        user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
-        await user.save();
-    }
-
-    const profileName = (await Profile.findById(user.profileId)).name;
-    return {
-        ...user.toJSON(),
-        "profileId": user.profileId,
-        "profileName": profileName,
-        "googleUser": true
-    };
-}
 
 
 async function authenticate({email, password}) {
@@ -65,8 +33,7 @@ async function authenticate({email, password}) {
             ...user.toJSON(),
             token,
             "profileId": user.profileId,
-            "profileName": profileName,
-            "googleUser": false
+            "profileName": profileName
         };
     }
 }
@@ -90,14 +57,14 @@ async function emailResetPassword(email) {
 async function createNewUser(userParam) {
     // validate
     let user = await User.findOne({email: userParam.email})
-    if (user && user.password !== "") {
-        //user already exists with password
+    if (user) {
+        //user already exists
         throw 'Email "' + userParam.email + '" is already taken';
-    } else if (!user) {
-        user = new User(userParam);
-        await user.save();
-        user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
     }
+    user = new User(userParam);
+    await user.save();
+    user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
+
     // hash password
     if (userParam.password) {
         user.password = bcrypt.hashSync(userParam.password, 10);
@@ -192,4 +159,37 @@ function checkPasswordValidation(password, user) {
 //     Object.assign(user, userData);
 //
 //     await user.save();
+// }
+
+
+
+// async function deleteGoogleUser(userId) {
+//     const user = await User.findById(userId);
+//     // validate
+//     if (!user) throw 'User ' + userId + ' not found';
+//
+//     //delete profiles (calenders + occurence+intakedate)
+//     await ProfileListService.deleteAllProfiles(userId)
+//     //delete supervisors
+//     await superviseService.deleteSupervisorList(userId)
+//     await User.findByIdAndDelete(userId);
+// }
+//
+// async function getGoogleAccount(userParam) {
+//     let user = await User.findOne({email: userParam.email});
+//     if (!user) {
+//         user = new User(userParam);
+//         // save user
+//         await user.save();
+//         user.profileId = await createProfileForMainProfile(user.id, userParam.mainProfileName);
+//         await user.save();
+//     }
+//
+//     const profileName = (await Profile.findById(user.profileId)).name;
+//     return {
+//         ...user.toJSON(),
+//         "profileId": user.profileId,
+//         "profileName": profileName,
+//         "googleUser": true
+//     };
 // }

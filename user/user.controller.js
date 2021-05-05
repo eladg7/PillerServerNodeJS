@@ -9,8 +9,8 @@ router.post('/register', register);
 router.post('/:userId', updateEmailUsernamePassword);
 router.delete('/:userId', deleteUser);
 
-router.post('/googleUser/getGoogleAccount', getGoogleAccount);
-router.delete('/googleUser/:userId', deleteUser);
+// router.post('/googleUser/getGoogleAccount', getGoogleAccount);
+// router.delete('/googleUser/:userId', deleteUser);
 module.exports = router;
 
 
@@ -46,15 +46,15 @@ function deleteUser(req, res, next) {
 }
 
 
-function getGoogleAccount(req, res, next) {
-    userService.getGoogleAccount(req.body)
-        .then(user => res.json(user))
-        .catch(err => next(err));
-}
-
-
-function deleteGoogleUser(req, res, next) {
-    userService.deleteGoogleUser(req.params.userId)
-        .then(() => res.json({}))
-        .catch(err => next(err));
-}
+// function getGoogleAccount(req, res, next) {
+//     userService.getGoogleAccount(req.body)
+//         .then(user => res.json(user))
+//         .catch(err => next(err));
+// }
+//
+//
+// function deleteGoogleUser(req, res, next) {
+//     userService.deleteGoogleUser(req.params.userId)
+//         .then(() => res.json({}))
+//         .catch(err => next(err));
+// }
