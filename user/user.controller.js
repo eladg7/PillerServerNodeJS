@@ -1,13 +1,14 @@
 ﻿const express = require('express');
 const router = express.Router();
 const userService = require('./user.service');
+const consts = require('_helpers/consts');
 
 // routes
-router.get('/resetPassword/:email', emailResetPassword);
-router.post('/authenticate', authenticate);
-router.post('/register', register);
-router.post('/:userId', updateEmailUsernamePassword);
-router.delete('/:userId', deleteUser);
+router.get(consts.user.emailResetPasswordRoute, emailResetPassword);
+router.post(consts.user.authenticateRoute, authenticate);
+router.post(consts.user.registerRoute, register);
+router.post(consts.user.updateEmailUsernamePasswordRoute, updateEmailUsernamePassword);
+router.delete(consts.user.deleteUserRoute, deleteUser);
 
 // router.post('/googleUser/getGoogleAccount', getGoogleAccount);
 // router.delete('/googleUser/:userId', deleteUser);
@@ -22,7 +23,7 @@ function emailResetPassword(req, res, next) {
 
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
-        .then(user => user ? res.json(user) : res.status(400).json({message: 'Username or password is incorrect'}))
+        .then(user => user ? res.json(user) : res.status(400).json({message: consts.user.userEmailPasswordError}))
         .catch(err => next(err));
 }
 
@@ -40,7 +41,7 @@ function updateEmailUsernamePassword(req, res, next) {
 
 
 function deleteUser(req, res, next) {
-    userService.deleteUser(req.params.userId,req.body)
+    userService.deleteUser(req.params.userId, req.body)
         .then(() => res.json({}))
         .catch(err => next(err));
 }

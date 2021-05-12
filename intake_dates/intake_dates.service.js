@@ -1,5 +1,6 @@
 const db = require('_helpers/db');
 const {decreasePillsLeft, increasePillsLeft} = require("../refill/refill.service");
+const consts = require('_helpers/consts');
 
 const IntakeDates = db.IntakeDates;
 
@@ -10,7 +11,7 @@ module.exports = {
 
 async function setIntake(intake_id, refillId, date, taken) {
     const intakeDates = await IntakeDates.findById(intake_id);
-    if (!intakeDates) throw 'Intake dates not found';
+    if (!intakeDates) throw consts.intake.intakeNotFoundError;
     let indexInArray = getElementIndex(intakeDates.intakes, date);
     if (indexInArray < 0) {
         intakeDates.intakes.push({date: date, isTaken: taken});
@@ -24,7 +25,7 @@ async function setIntake(intake_id, refillId, date, taken) {
 
 
 async function updatePillsLeft(taken, refillId) {
-    var pillsLeft;
+    let pillsLeft;
     if (taken) {
         pillsLeft = await decreasePillsLeft(refillId);
     } else {
@@ -46,6 +47,6 @@ function getElementIndex(array, valueToCheck) {
 
 async function getAllIntakes(intake_id) {
     const intakeDates = await IntakeDates.findById(intake_id);
-    if (!intakeDates) throw 'Intake dates not found';
+    if (!intakeDates) throw consts.intake.intakeNotFoundError;
     return intakeDates.intakes;
 }

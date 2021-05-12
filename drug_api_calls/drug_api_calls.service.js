@@ -4,6 +4,7 @@ const xml2js = require('xml2js');
 const parser = new xml2js.Parser();
 const requestPromise = require('request-promise');
 const calendarService = require('../calendar/calendar.service');
+const consts = require('_helpers/consts');
 
 parser.on('error', function (err) {
     console.log('Parser error', err);
@@ -17,10 +18,14 @@ module.exports = {
     findDrugByImage
 };
 
+function drugHasRxcui(rxcui) {
+    return rxcui !== "0";
+}
+
 async function getDrugImage(rxcui) {
     let imageSrc = "";
-    if (rxcui !== "0") {
-        const options = buildRequestOptions(true, 'https://rximage.nlm.nih.gov/api/rximage/1/rxnav?rxcui=' + rxcui);
+    if (drugHasRxcui(rxcui)) {
+        const options = buildRequestOptions(true, consts.drugApiCalls.drugImageRXUrl + rxcui);
         const result = await requestPromise(options);
         imageSrc = getImageFromResult(result);
     }
@@ -39,18 +44,18 @@ function getImageFromResult(result) {
 async function findInteractions(userId, profileId, newRxcui) {
     const drugList = (await calendarService.getSpecificCalendar(userId, profileId)).drug_info_list;
     let parsedInter = [];
-    if (newRxcui !== "0") {
+    if (drugHasRxcui(newRxcui)) {
         const rxcuisJoined = [];
         //  push new rxcui
         rxcuisJoined.push(newRxcui);
         //  push all current drug rxcui that aren't 0
         for (let i = 0; i < drugList.length; i++) {
-            if (drugList[i].rxcui !== "0") {
+            if (drugHasRxcui(drugList[i].rxcui)) {
                 rxcuisJoined.push(drugList[i].rxcui);
             }
         }
         if (rxcuisJoined.length > 1) {
-            const options = buildRequestOptions(true, 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + rxcuisJoined.join('+'));
+            const options = buildRequestOptions(true, consts.drugApiCalls.drugInteractionsUrl + rxcuisJoined.join('+'));
             const result = await requestPromise(options);
             parsedInter = parseInteraction(result, newRxcui);
         }
@@ -67,7 +72,7 @@ function buildRequestOptions(isJson, uri, properties = {}) {
 }
 
 function getDrugSearchByImageURI(properties) {
-    let baseUrl = "https://rximage.nlm.nih.gov/api/rximage/1/rxnav";
+    let baseUrl = consts.drugApiCalls.drugByImageParametersUrl;
     let isFirst = true;
     for (const [key, value] of Object.entries(properties)) {
         if (isFirst) {
@@ -89,8 +94,8 @@ async function getDrugsByProperties(properties) {
 async function findDrugByImage(file) {
     let drugs = [];
     if (file !== undefined && file.buffer !== undefined) {
-        const options = buildRequestOptions(true, 'http://127.0.0.1:5000/drugByImage', {
-            method: 'POST',
+        const options = buildRequestOptions(true, consts.drugApiCalls.pythonMLServerUrl, {
+            method: consts.RESTRequests.post,
             body: {
                 file: file.buffer
             }
@@ -125,7 +130,7 @@ function saveImage(filename, data) {
 
 async function findDrugByName(drugName) {
     //const parsedDrugName=drugName.replace(/ /g,"+");
-    const options = buildRequestOptions(false, 'https://rxnav.nlm.nih.gov/REST/drugs', {
+    const options = buildRequestOptions(false, consts.drugApiCalls.drugByNameUrl, {
         qs: {
             name: drugName
         }
@@ -175,19 +180,26 @@ function parseInteraction(interactionResult, newRxcui) {
 
 }
 
+function responseHasDrugs(drugXML) {
+    return typeof drugXML.rxnormdata.drugGroup[0].conceptGroup !== 'undefined';
+}
+
+function isItemTTYValid(itemTTY) {
+    // there are multiple array because each array is difference TTY, as described ib here:
+    // https://mor.nlm.nih.gov/download/rxnav/RxNormAPIs.html#uLink=RxNorm_REST_getDrugs
+    //  we'll take only: branded drug (SBD) or branded pack (BPCK)
+    return itemTTY === consts.drugApiCalls.SBD || itemTTY === consts.drugApiCalls.SCD || itemTTY === consts.drugApiCalls.SBDC;
+}
+
 function parseDrugsXML(drugXML) {
     const drugOptions = [];
     //  make sure that the result contains any drugs, if it doesn't contain any - the conceptGroup will be 'undefined'
-    if (typeof drugXML.rxnormdata.drugGroup[0].conceptGroup !== 'undefined') {
+    if (responseHasDrugs(drugXML)) {
         //  all the data about the drug (name, rxcui, etc.) is in drugXML.rxnormdata.drugGroup[0].conceptGroup. It is
         //  an array that contains all the possibilities
         for (const item of drugXML.rxnormdata.drugGroup[0].conceptGroup) {
-            // there are multiple array because each array is difference TTY, as described ib here:
-            // https://mor.nlm.nih.gov/download/rxnav/RxNormAPIs.html#uLink=RxNorm_REST_getDrugs
-            //  we'll take only: branded drug (SBD) or branded pack (BPCK)
-            const itemTTY = item["tty"].toString()
-            if ("conceptProperties" in item &&
-                (itemTTY === "SBD" || itemTTY === "SCD" || itemTTY === "SBDC")) { // itemTTY === "BPCK"
+            const itemTTY = item[consts.drugApiCalls.itemTTY].toString()
+            if (consts.drugApiCalls.conceptProperties in item && isItemTTYValid(itemTTY)) { // itemTTY === "BPCK"
                 drugOptions.push(getDrugsFromConceptProperties(item.conceptProperties));
             }
         }
@@ -199,7 +211,7 @@ function parseDrugsXML(drugXML) {
 function getDrugsFromConceptProperties(conceptProperties) {
     const drugOptions = [];
     for (const item of conceptProperties) {
-        drugOptions.push({rxcui: item["rxcui"], name: item["name"]});
+        drugOptions.push({rxcui: item[consts.drug.rxcui], name: item[consts.drug.name]});
     }
     return drugOptions;
 }

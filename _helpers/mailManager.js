@@ -1,15 +1,17 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const consts = require('_helpers/consts');
+
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: consts.mail.service,
     auth: {
-        user: 'piller.inc1@gmail.com',
-        pass: 'PillerPill'
+        user: consts.mail.user,
+        pass: consts.mail.password
     }
 });
 
-function sendMailHTML(to,subject,htmlText){
+function sendMailHTML(to, subject, htmlText) {
     const mailOptions = {
-        from: 'piller.inc1@gmail.com',
+        from: consts.mail.user,
         to: to.join(),
         subject: subject,
         html: htmlText
@@ -20,7 +22,7 @@ function sendMailHTML(to,subject,htmlText){
             console.log(error);
             //throw error;
         } else {
-            console.log('Email send: ' + info.response)
+            console.log(consts.mail.emailSent + info.response)
         }
     })
 }

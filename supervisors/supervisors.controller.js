@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const supervisorsService = require('./supervisors.service');
+const consts = require('_helpers/consts');
 
 // routes
-router.get('/:userId', getSupervisors);
-router.get('/confirmation/:userId/:supervisorName/:supervisorEmail', updateConfirmation);
-router.post('/:userId/:supervisorName/:supervisorEmail', addSupervisor);
-router.delete('/:userId/:supervisorEmail', deleteSupervisor);
-router.get('/unsubscribe/:userId/:supervisorEmail', unsubscribeSupervisor);
-router.put('/threshold/:userId/:threshold', updateThreshold);
-router.get('/threshold/:userId', getThreshold);
-router.delete('/:userId', deleteSupervisorList);
+router.get(consts.supervisors.getSupervisorsRoute, getSupervisors);
+router.get(consts.supervisors.updateConfirmationRoute, updateConfirmation);
+router.post(consts.supervisors.addSupervisorRoute, addSupervisor);
+router.delete(consts.supervisors.deleteSupervisorRoute, deleteSupervisor);
+router.get(consts.supervisors.unsubscribeSupervisorRoute, unsubscribeSupervisor);
+router.put(consts.supervisors.updateThresholdRoute, updateThreshold);
+router.get(consts.supervisors.getThresholdRoute, getThreshold);
+router.delete(consts.supervisors.deleteSupervisorListRoute, deleteSupervisorList);
 
 module.exports = router;
 
@@ -40,7 +41,7 @@ function deleteSupervisor(req, res, next) {
 function updateConfirmation(req, res, next) {
     supervisorsService.updateConfirmation(req.params.userId,
         req.params.supervisorName, req.params.supervisorEmail)
-        .then(message => message ? res.status(200).json('Confirmation succeeded!')
+        .then(message => message ? res.status(200).json(consts.supervisors.confirmationSuccessMessage)
             : res.status(400).json({}))
         .catch(err => next(err));
 }

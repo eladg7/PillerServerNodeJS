@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const consts = require('_helpers/consts');
 
 const schema = new Schema({
     intakes: [{date: {type: Number, required: true}, isTaken: {type: Boolean, required: true}}]
@@ -13,4 +14,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('IntakeDates', schema);
+module.exports = mongoose.model(consts.intake.modelName, schema);

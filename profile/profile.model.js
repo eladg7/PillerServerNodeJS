@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const consts = require('_helpers/consts');
 
 const schema = new Schema({
     name: {type: String, required: true},
@@ -14,4 +15,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Profile', schema);
+module.exports = mongoose.model(consts.profile.profileModelName, schema);

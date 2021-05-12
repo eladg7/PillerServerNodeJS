@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const profileService = require('./profileList.service');
+const consts = require('_helpers/consts');
 
 // routes
-router.get('/:userId', getAllProfiles);
-router.post('/:userId', initProfileList);
-router.put('/:userId', addProfile);
-router.delete('/:userId/:profileId', deleteProfile);
-router.delete('/:userId', deleteAllProfiles);
+router.get(consts.profile.getAllProfilesRoute, getAllProfiles);
+router.post(consts.profile.initProfileListRoute, initProfileList);
+router.put(consts.profile.addProfileRoute, addProfile);
+router.delete(consts.profile.deleteProfileRoute, deleteProfile);
+router.delete(consts.profile.deleteAllProfilesRoute, deleteAllProfiles);
 
 
 module.exports = router;
@@ -25,7 +26,7 @@ function getAllProfiles(req, res, next) {
 }
 
 function addProfile(req, res, next) {
-    profileService.addProfile(req.params.userId,req.body)
+    profileService.addProfile(req.params.userId, req.body)
         .then(profiles => res.json(profiles))
         .catch(err => next(err));
 }

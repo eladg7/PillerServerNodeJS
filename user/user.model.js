@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const consts = require('_helpers/consts');
 
 const schema = new Schema({
     profileId: {type: String, required: false},
     password: {type: String, required: false},
     email: {type: String, unique: true, required: true},
-    createdDate: {type: Date, default: Date.now}
+    createdDate: {type: Date, default: consts.user.defaultCreateDate}
 });
 
 schema.set('toJSON', {
@@ -17,4 +18,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('User', schema);
+module.exports = mongoose.model(consts.user.userModelName, schema);
