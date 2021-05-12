@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const consts = require('_helpers/consts');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
@@ -8,7 +9,6 @@ const schema = new Schema({
     taken_id: {type: String, required: true},
     refill_id: {type: String, required: true},
     dose_id: {type: String, required: true}
-
 });
 
 schema.set('toJSON', {
@@ -19,4 +19,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Drug', schema);
+module.exports = mongoose.model(consts.drug.drugModelName, schema);

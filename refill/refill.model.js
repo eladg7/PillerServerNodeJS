@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const consts = require('_helpers/consts');
 
 const schema = new Schema({
-    is_to_notify: {type: Boolean, required: true, default: false},
-    pills_left: {type: Number, default: 0},
-    pills_before_reminder:{type: Number, default: 1},
-    reminder_time:{type: String,default: "00:00"}
+    is_to_notify: {type: Boolean, required: true, default: consts.refill.defaultIsToNotify},
+    pills_left: {type: Number, default: consts.refill.defaultPillsLeft},
+    pills_before_reminder: {type: Number, default: consts.refill.defaultPillsBeforeReminder},
+    reminder_time: {type: String, default: consts.refill.defaultReminderTime}
 
 
 });
@@ -18,4 +19,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Refill', schema);
+module.exports = mongoose.model(consts.refill.refillModelName, schema);

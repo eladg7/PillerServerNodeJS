@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
+const consts = require('_helpers/consts');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-    repeat_start: {type: String, required: true, default: Date.now},
-    repeat_year: {type: Number, default: 0},
-    repeat_month: {type: Number, default: 0},
-    repeat_day: {type: Number, default: 0},
-    repeat_week: {type: Number, default: 0},
-    repeat_weekday: [{type: Number, default: 0}],
-    repeat_end: {type: String, default: "0"}
+    repeat_start: {type: String, required: true, default: consts.occurrence.defaultRepeatStart},
+    repeat_year: {type: Number, default: consts.occurrence.defaultRepeatYear},
+    repeat_month: {type: Number, default: consts.occurrence.defaultRepeatMonth},
+    repeat_day: {type: Number, default: consts.occurrence.defaultRepeatDay},
+    repeat_week: {type: Number, default: consts.occurrence.defaultRepeatWeek},
+    repeat_weekday: [{type: Number, default: consts.occurrence.defaultRepeatWeekday}],
+    repeat_end: {type: String, default: consts.occurrence.defaultRepeatEnd}
 });
 
 schema.set('toJSON', {
@@ -19,4 +20,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Occurrence', schema);
+module.exports = mongoose.model(consts.occurrence.occurrence, schema);

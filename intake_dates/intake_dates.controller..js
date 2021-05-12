@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const IntakeService = require('./intake_dates.service');
+const consts = require('_helpers/consts');
 
 // routes
-router.post('/setIntakeTaken/:taken_id/:refill_id/:date', setIntakeTaken);
-router.post('/setIntakeNotTaken/:taken_id/:refill_id/:date', setIntakeNotTaken);
-router.get('/getAllIntakes/:taken_id', getAllIntakes);
+router.post(consts.intake.setIntakeTakenRoute, setIntakeTaken);
+router.post(consts.intake.setIntakeNotTakenRoute, setIntakeNotTaken);
+router.get(consts.intake.getAllIntakesRoute, getAllIntakes);
 
 module.exports = router;
 

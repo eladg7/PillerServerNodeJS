@@ -8,6 +8,7 @@ const {getAllIntakes} = require("../intake_dates/intake_dates.service");
 const sendMailHTML = require('_helpers/mailManager');
 
 const User = db.User;
+const Profile = db.Profile;
 
 module.exports = {
     mailAllSupervisors
@@ -17,10 +18,11 @@ async function mailAllSupervisors() {
     //  get every user
     await User.find({}).stream()
         .on('data', async function (user, _) {
-            const threshold = (await getThreshold(user.id)).threshold;
+            const userId = user._id.toString();
+            const threshold = (await getThreshold(userId)).threshold;
             if (threshold > 0) {
-                const supervisors = await getConfirmedSupervisors(user.id);
-                const drugList = (await getSpecificCalendar(user.id, user.id)).drug_info_list;
+                const supervisors = await getConfirmedSupervisors(userId);
+                const drugList = (await getSpecificCalendar(userId, user.profileId)).drug_info_list;
                 await sendMailAboutUser(drugList, user, supervisors, threshold);
             }
         })
@@ -34,7 +36,7 @@ async function mailAllSupervisors() {
 
 async function sendMailAboutUser(drugList, user, supervisors, threshold) {
     for (let i = 0; i < drugList.length; i++) {
-        let intakes = await getAllIntakes(drugList[i].taken_id);
+        let intakes = await getAllIntakes(drugList[i].intake_dates.taken_id);
 
         intakes = getRelevantDates(intakes);
         //  get the last elements
@@ -70,18 +72,18 @@ function hasConsecutiveNotTaken(intakes) {
 }
 
 async function mailSupervisors(user, supervisors, drug, threshold) {
+    const userName = (await Profile.findById(user.profileId)).name;
     for (let i = 0; i < supervisors.length; i++) {
-        const unsubscribe_link = 'http://' + consts.serverConfig['IP'] + ':' + consts.serverConfig['PORT']
-            + "/supervisors/unsubscribe/" + user.id + "/" + supervisors[i].supervisorEmail;
-        const message = "<p>Hello " + supervisors[i].supervisorName + "!<br>" + user.name + " didn't take " + drug.name
-            + " for the past " + threshold + " days." + "<br> To unsubscribe from being " + user.name
-            + "'s supervisor, press " + "<a href=" + unsubscribe_link + ">here</a> </p>";
-        sendMailHTML([supervisors[i].supervisorEmail], 'Piller - Supervisor Alert', message);
+        const unsubscribe_link = `http://${consts.serverConfig.IP}:${consts.serverConfig.port}${consts.supervisors.unsubscribeLink}${user._id.toString()}/${supervisors[i].supervisorEmail}`;
+        const message = `<p>Hello ${supervisors[i].supervisorName}!<br>${userName} didn't take ${drug.name}` +
+            ` for the past ${threshold} days.<br> To unsubscribe from being ${userName}'s supervisor,` +
+            ` press <a href=${unsubscribe_link}>here</a></p>`;
+        sendMailHTML([supervisors[i].supervisorEmail], consts.supervisors.supervisorMailTitle, message);
     }
 }
 
 function mailUser(user, drug, threshold) {
     const message = "<p>Hello " + user.name + "!<br>" + "It seems like you missed " + drug.name
         + " for the past " + threshold + " days. Remember to take your medicine and log it in Piller!";
-    sendMailHTML([user.email], 'Piller - Missed Medicine', message);
+    sendMailHTML([user.email], consts.supervisors.userMailTitle, message);
 }

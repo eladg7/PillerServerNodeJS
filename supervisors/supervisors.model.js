@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const consts = require('_helpers/consts');
 
 const schema = new Schema({
     userId: {type: String, unique: true, required: true},
@@ -15,4 +16,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Supervisors', schema);
+module.exports = mongoose.model(consts.supervisors.supervisorsModelName, schema);

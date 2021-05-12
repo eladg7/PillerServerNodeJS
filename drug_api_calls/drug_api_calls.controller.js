@@ -2,20 +2,21 @@ const express = require('express');
 const router = express.Router();
 const drugService = require('./drug_api_calls.service');
 const ocrService = require('../ocr/ocr.service');
+const consts = require('_helpers/consts');
 const multer = require('multer');
 const upload = multer();
 
-router.get('/drugByName/:drugName', findDrugByName);
-router.get('/findInteractions/:userId/:profileId/:newRxcui', findInteractions);
-router.get('/getDrugImage', getDrugImage);
+router.get(consts.drugApiCalls.findDrugByNameRoute, findDrugByName);
+router.get(consts.drugApiCalls.findInteractionsRoute, findInteractions);
+router.get(consts.drugApiCalls.getDrugImageRoute, getDrugImage);
 //  user upload.single because we will receive amn image as multi-part
-router.post('/findDrugByImage', upload.single('file'), findDrugByImage);
-router.post('/findDrugByBoxImage', upload.single('file'), findDrugByBoxImage);
+router.post(consts.drugApiCalls.findDrugByImageRoute, upload.single('file'), findDrugByImage);
+router.post(consts.drugApiCalls.findDrugByBoxImageRoute, upload.single('file'), findDrugByBoxImage);
 
 module.exports = router;
 
 function getDrugImage(req, res, next) {
-    drugService.getDrugImage(req.query["rxcui"])
+    drugService.getDrugImage(req.query[consts.drug.rxcui])
         .then(result => res.json(result))
         .catch(err => next(err));
 }
