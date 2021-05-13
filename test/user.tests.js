@@ -8,7 +8,7 @@ const ProfileList = db.ProfileList;
 
 const {authenticate, createNewUser, updateEmailUsernamePassword, deleteUser} = require("../user/user.service");
 let email = "PillerTestEmail", emailUpdated = "PillerTestEmailUpdated", password = "PillerTestEmail",
-    passwordUpdated = "PillerTestEmailUpdated",
+    wrongPassword = "PillerTestEmailW" ,passwordUpdated = "PillerTestEmailUpdated",
     mainProfileName = "PillerTestName", mainProfileNameUpdated = "PillerTestNameUpdated", userID;
 
 describe('user.js tests', () => {
@@ -29,6 +29,19 @@ describe('user.js tests', () => {
             const result = await authenticate({email: emailUpdated, password: passwordUpdated});
             assert(result[consts.user.email], emailUpdated);
             assert(result[consts.user.profileName], mainProfileNameUpdated);
+        });
+
+        it('update user Test with wrong password', async () => {
+            let isSucceded=true;
+            try{
+                await updateEmailUsernamePassword(userID, {
+                    email: emailUpdated, oldPassword: wrongPassword,
+                    password: passwordUpdated, mainProfileName: mainProfileNameUpdated
+                });
+            }catch(e){
+                isSucceded=false;
+            }
+            assert(isSucceded===false);
         });
     });
 

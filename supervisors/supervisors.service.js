@@ -103,6 +103,7 @@ async function updateConfirmation(userId, supervisorName, supervisorEmail) {
 
 
 async function deleteSupervisor(userId, supervisorEmail) {
+    let isDeleted=false;
     let userSupervisors = await Supervisors.findOne({userId: userId});
     if (!userSupervisors) {
         throw consts.supervisors.supervisorListDoesNotExistError;
@@ -112,9 +113,11 @@ async function deleteSupervisor(userId, supervisorEmail) {
         if (supervisors[i].supervisorEmail === supervisorEmail) {
             supervisors.splice(i, 1);
             await userSupervisors.save();
+            isDeleted=true;
             break;
         }
     }
+    return isDeleted;
 }
 
 async function updateThreshold(userId, threshHold) {
