@@ -1,6 +1,6 @@
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const {getAllIntakes} = require("../intake_dates/intake_dates.service");
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 const prepareResult = require('../_helpers/ResultPreparer');
 
 const Calendar = db.Calendar;

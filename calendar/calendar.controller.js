@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const calendarService = require('./calendar.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 // routes
 router.post(consts.calendar.addDrugRoute, add_drug);

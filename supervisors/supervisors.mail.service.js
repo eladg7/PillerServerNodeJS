@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const db = require('_helpers/db');
-const consts = require('_helpers/consts');
+const db = require('../_helpers/db');
+const consts = require('../_helpers/consts');
 
 const {getConfirmedSupervisors, getThreshold} = require("./supervisors.service");
 const {getSpecificCalendar} = require("../calendar/calendar.service");

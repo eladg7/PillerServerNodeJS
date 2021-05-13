@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 const schema = new Schema({
     userId: {type: String, unique: true, required: true},

@@ -1,9 +1,9 @@
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const requestPromise = require('request-promise');
 const xml2js = require("xml2js");
 const parser = new xml2js.Parser();
 const drug_apiService = require('../drug_api_calls/drug_api_calls.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 module.exports = {
     findDrugByBoxImage

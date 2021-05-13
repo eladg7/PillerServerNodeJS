@@ -1,6 +1,6 @@
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const {decreasePillsLeft, increasePillsLeft} = require("../refill/refill.service");
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 const IntakeDates = db.IntakeDates;
 

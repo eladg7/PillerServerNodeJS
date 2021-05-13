@@ -4,7 +4,7 @@ const xml2js = require('xml2js');
 const parser = new xml2js.Parser();
 const requestPromise = require('request-promise');
 const calendarService = require('../calendar/calendar.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 parser.on('error', function (err) {
     console.log('Parser error', err);

@@ -1,9 +1,9 @@
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const calendarService = require('../calendar/calendar.service');
 const User = db.User;
 const ProfileList = db.ProfileList;
 const Profile = db.Profile;
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 const prepareResult = require('../_helpers/ResultPreparer');
 
 module.exports = {

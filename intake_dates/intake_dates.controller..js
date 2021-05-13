@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const IntakeService = require('./intake_dates.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 // routes
 router.post(consts.intake.setIntakeTakenRoute, setIntakeTaken);
