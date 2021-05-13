@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 const transporter = nodemailer.createTransport({
     service: consts.mail.service,

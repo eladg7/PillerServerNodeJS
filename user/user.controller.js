@@ -1,7 +1,7 @@
 ﻿const express = require('express');
 const router = express.Router();
 const userService = require('./user.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 // routes
 router.get(consts.user.emailResetPasswordRoute, emailResetPassword);

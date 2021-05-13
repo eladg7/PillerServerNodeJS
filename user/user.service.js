@@ -1,16 +1,16 @@
-﻿const config = require('config.json');
+﻿const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const superviseService = require('../supervisors/supervisors.service');
 const Profile = require('../profile/profile.model');
 const ProfileListService = require('../profile/profileList.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 const prepareResult = require('../_helpers/ResultPreparer');
 
 const User = db.User;
 const passwordGenerator = require('generate-password');
-const sendMailHTML = require('_helpers/mailManager');
+const sendMailHTML = require('../_helpers/mailManager');
 
 const resetPasswordLength = 7;
 

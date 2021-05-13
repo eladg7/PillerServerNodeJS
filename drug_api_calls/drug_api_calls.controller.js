@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const drugService = require('./drug_api_calls.service');
 const ocrService = require('../ocr/ocr.service');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 const multer = require('multer');
 const upload = multer();
 

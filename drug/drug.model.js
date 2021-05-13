@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({

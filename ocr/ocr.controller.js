@@ -3,7 +3,7 @@ const router = express.Router();
 const OcrService = require('./ocr.service');
 const multer = require('multer');
 const upload = multer();
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 // routes
 router.post(consts.ocr.findDrugByBoxImageRoute, upload.single('file'), findDrugByBoxImage);

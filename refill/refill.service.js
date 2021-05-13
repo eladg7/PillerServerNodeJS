@@ -1,6 +1,6 @@
-const db = require('_helpers/db');
+const db = require('../_helpers/db');
 const Refill = db.Refill;
-const consts = require('_helpers/consts');
+const consts = require('../_helpers/consts');
 
 module.exports = {
     decreasePillsLeft,
