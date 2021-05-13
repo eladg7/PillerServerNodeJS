@@ -23,7 +23,6 @@ module.exports = {
 async function getSpecificCalendar(userId, profileId) {
     const drugInfoList = [];
     let calendar = await Calendar.findOne({userId: userId, profileId: profileId});
-
     if (!calendar) {
         calendar = new Calendar({userId: userId, profileId: profileId, drugList: []});
         await calendar.save();
@@ -99,15 +98,36 @@ async function deleteFutureOccurrencesOfDrugByUser(userId, profileId, drug_id, r
 }
 
 /*
-{
-    "name":"acamol",
-    "rxcui":12345,
-    "repeat_start":"1606302569494",
-    "repeat_year":0,
-    "repeat_month":0,
-    "repeat_day":0,
-    "repeat_week":1,
-    "repeat_weekday":2
+new_drug_info = {
+  "calendar_id": "607aae8a20210e41ccf30ea8",
+  "dose": {
+    "dose_id": "",
+    "measurement_type": "pills",
+    "total_dose": 1
+  },
+  "drug_id": "",
+  "name": "abacavir 600 MG \\/ lamivudine 300 MG Oral Tablet",
+  "occurrence": {
+    "event_id": "",
+    "repeat_day": 0,
+    "repeat_end": 0,
+    "repeat_month": 0,
+    "repeat_start": 1620924180000,
+    "repeat_week": 0,
+    "repeat_weekday": [
+      0
+    ],
+    "repeat_year": 0
+  },
+  "refill": {
+    "is_to_notify": false,
+    "pills_before_reminder": 1,
+    "pills_left": 0,
+    "refill_id": "",
+    "reminder_time": "11:00"
+  },
+  "rxcui": 602393,
+  "taken_id": ""
 }
  */
 async function add_new_drug(userId, profileId, new_drug_info) {
@@ -122,7 +142,7 @@ async function add_drug(calendar, new_drug_info) {
     const drug_name = new_drug_info.name;
     const drug_rxcui = new_drug_info.rxcui;
     const event_id = await createOccurForDrug(new_drug_info);
-    const taken_id = await createIntakeDatesForDrug(new_drug_info);
+    const taken_id = await createIntakeDatesForDrug();
     const dose_id = await createDoseForDrug(new_drug_info);
     const refill_id = await createRefillForDrug(new_drug_info);
 
@@ -203,15 +223,18 @@ async function delete_drug(userId, profileId, drug_id, returnCalendar = false) {
 async function _delete(userId, profileId) {
     const calendar = await Calendar.findOne({userId: userId, profileId: profileId});
     // validate
-    if (!calendar) throw consts.calendar.calendarNotFound;
-    const drugList = calendar.drugList;
+    if (calendar) {
+        const drugList = calendar.drugList;
 
-    // delete all occurrences in calendar
-    for (let i = 0; i < drugList.length; i++) {
-        await deleteAllDrugObject(drugList[i]);
+        // delete all occurrences in calendar
+        for (let i = 0; i < drugList.length; i++) {
+            await deleteAllDrugObject(drugList[i]);
+        }
+
+        await Calendar.deleteOne({userId: userId, profileId: profileId});
+        return true;
     }
-
-    await Calendar.deleteOne({userId: userId, profileId: profileId});
+    return false;
 }
 
 
