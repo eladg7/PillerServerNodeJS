@@ -2,6 +2,7 @@ const assert = require('assert');
 const consts = require('../_helpers/consts');
 const db = require('../_helpers/db');
 const Drug = db.Drug;
+const Occurrence = db.Occurrence;
 const {authenticate, createNewUser, deleteUser} = require("../user/user.service");
 const calendarService = require("../calendar/calendar.service");
 
@@ -96,7 +97,8 @@ describe('calendar.js tests', () => {
             let result = await registerUserAndUpdateUserId();
             await calendarService.getSpecificCalendar(userID, result[consts.user.profileId]);
             let newDrug = await calendarService.add_new_drug(userID, result[consts.user.profileId], drugInfo);
-            assert(calendarService.deleteFutureOccurrencesOfDrugByUser(userID, result[consts.user.profileId], newDrug.drug_id, "0"));
+            await calendarService.deleteFutureOccurrencesOfDrugByUser(userID, result[consts.user.profileId], newDrug.drug_id, "0");
+            assert((await Occurrence.findById(newDrug.event_id)).repeat_end === "0");
             await deleteUser(userID, {password: password});
         });
     });
@@ -105,7 +107,7 @@ describe('calendar.js tests', () => {
         it('delete calendar Test', async () => {
             let result = await registerUserAndUpdateUserId();
             await calendarService.getSpecificCalendar(userID, result[consts.user.profileId]);
-            assert(calendarService.delete(userID, result[consts.user.profileId]));
+            assert(await calendarService.delete(userID, result[consts.user.profileId]));
             await deleteUser(userID, {password: password});
         });
     });
