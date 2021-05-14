@@ -107,25 +107,8 @@ async function findDrugByImage(file) {
             drugs = getDrugsByProperties(result);
         }
     }
+    
     return drugs;
-
-    //  todo delete next line (and the function) i left it here only so you will be able to see the image that
-    //  the user sent
-    // saveImage('iamge.jpg', file.buffer);
-}
-
-function saveImage(filename, data) {
-    const myBuffer = new Buffer(data.length);
-    for (let i = 0; i < data.length; i++) {
-        myBuffer[i] = data[i];
-    }
-    fs.writeFile(filename, myBuffer, function (err) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log("The file was saved!");
-        }
-    });
 }
 
 async function findDrugByName(drugName) {
