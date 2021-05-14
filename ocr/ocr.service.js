@@ -15,18 +15,21 @@ parser.on('error', function (err) {
 });
 
 async function findDrugByBoxImage(file) {
-    //  todo handle file is undefined
-    const options = {
-        method: consts.RESTRequests.post,
-        uri: consts.ocr.findDrugByBoxImagePythonURL,
-        body: {
-            file: file.buffer
-        },
-        json: true
-    };
+    let drugOptions = [];
+    if (file && file.buffer) {
+        const options = {
+            method: consts.RESTRequests.post,
+            uri: consts.ocr.findDrugByBoxImagePythonURL,
+            body: {
+                file: file.buffer
+            },
+            json: true
+        };
 
-    const result = await requestPromise(options);
-    return await findDrugNameFromString(result);
+        const result = await requestPromise(options);
+        drugOptions = await findDrugNameFromString(result);
+    }
+    return drugOptions;
 }
 
 async function findDrugNameFromString(possibleDrugName) {
