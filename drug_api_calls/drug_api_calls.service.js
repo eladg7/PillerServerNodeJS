@@ -88,7 +88,9 @@ function getDrugSearchByImageURI(properties) {
 async function getDrugsByProperties(properties) {
     let options = buildRequestOptions(true, getDrugSearchByImageURI(properties));
     const drugsProperties = await requestPromise(options);
-    return getDrugsFromConceptProperties(drugsProperties.nlmRxImages);
+    let drugsFound = [];
+    drugsFound.push(getDrugsFromConceptProperties(drugsProperties.nlmRxImages));
+    return drugsFound;
 }
 
 async function findDrugByImage(file) {
@@ -107,7 +109,7 @@ async function findDrugByImage(file) {
             drugs = getDrugsByProperties(result);
         }
     }
-    
+
     return drugs;
 }
 
@@ -194,7 +196,9 @@ function parseDrugsXML(drugXML) {
 function getDrugsFromConceptProperties(conceptProperties) {
     const drugOptions = [];
     for (const item of conceptProperties) {
-        drugOptions.push({rxcui: item[consts.drug.rxcui], name: item[consts.drug.name]});
+        if (item[consts.drug.name] !== "") {
+            drugOptions.push({rxcui: item[consts.drug.rxcui], name: item[consts.drug.name]});
+        }
     }
     return drugOptions;
 }
