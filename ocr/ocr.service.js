@@ -33,6 +33,7 @@ async function findDrugByBoxImage(file) {
 }
 
 async function findDrugNameFromString(possibleDrugName) {
+    //split string for possible drug by whitespaces.
     const splittedResult = possibleDrugName.split(/\r\n|\r|\n/).filter(function (entry) {
         return /\S/.test(entry);
     });
@@ -53,7 +54,8 @@ async function findPossibleDrugNames(splittedResult, measurementResult) {
 async function findPossibleDrugNamesWithMeasurement(splittedResult, measurementResult) {
     let drugOptions = []
     for (let i = 0; i < splittedResult.length; i++) {
-        const possibleName = changeDrugNameToContainMeasuremnt(splittedResult[i], measurementResult);
+        //find drug name from splitted string
+        const possibleName = changeDrugNameToContainMeasurement(splittedResult[i], measurementResult);
         let resultOptions = await drug_apiService.findDrugByName(possibleName);
         if (resultOptions.length > 0) {
             //more options
@@ -67,6 +69,7 @@ async function findPossibleDrugNamesWithMeasurement(splittedResult, measurementR
 async function findPossibleDrugNamesWithoutMeasurement(splittedResult) {
     let drugOptions = []
     for (let i = 0; i < splittedResult.length; i++) {
+        // find drug name from splitted string
         const possibleName = splittedResult[i];
         let resultOptions = await drug_apiService.findDrugByName(possibleName);
         if (resultOptions.length > 0) {
@@ -79,17 +82,22 @@ async function findPossibleDrugNamesWithoutMeasurement(splittedResult) {
 }
 
 
-function changeDrugNameToContainMeasuremnt(name, measurementResult) {
+function changeDrugNameToContainMeasurement(name, measurementResult) {
+    // all by lower case with spaces. (ex. MG200 -> mg 200)
     const arrMeasur = measurementResult.toLowerCase().split(" ");
     const arr = name.toLowerCase().split(" ");
 
+    // remove from drug name the measurments
     for (let index = arr.length - 1; index >= 0; index--) {
         const temp = arr[index].replace(/\d/g, "");
-        if (temp === arrMeasur[1] || temp === "") { //measurment type (mg) or only digits
+        //check if temp was measurment type (mg) or only digits
+        if (temp === arrMeasur[1] || temp === "") {
             //remove from string the measuremnt to not add it twice
             arr.splice(index, 1);
         }
     }
+
+    // create joined drug name with measurement
     return arr.join(" ") + " " + measurementResult;
 }
 
