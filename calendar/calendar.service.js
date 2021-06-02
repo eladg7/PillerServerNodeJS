@@ -53,27 +53,23 @@ async function getDrugObjectValues(drugId) {
     const refillId = drugObject.refill_id;
     const refillInfo = await Refill.findById(refillId);
 
-    let occurrenceData = {};
-    occurrenceData[consts.occurrence.eventId] = eventId;
-    occurrenceData[consts.drug.drugInfo] = drugInfo;
-    let intakeData = {};
-    intakeData[consts.intake.takenId] = takenId;
-    intakeData[consts.intake.intakes] = intakes;
-    let doseData = {};
-    doseData[consts.dose.doseId] = doseId;
-    doseData[consts.dose.doseInfo] = doseInfo;
-    let refillData = {};
-    refillData[consts.refill.refillId] = refillId;
-    refillData[consts.refill.refillInfo] = refillInfo;
+
+    let occurrenceData = prepareMapObject(consts.occurrence.eventId,eventId,consts.drug.drugInfo,drugInfo);
+    let intakeData =  prepareMapObject(consts.intake.takenId,takenId,consts.intake.intakes,intakes);
+    let doseData = prepareMapObject(consts.dose.doseId,doseId,consts.dose.doseInfo,doseInfo);
+    let refillData = prepareMapObject(consts.refill.refillId,refillId,consts.refill.refillInfo,refillInfo);
     return prepareResult.prepareResult(
-        [consts.drug.drugId, drugId],
-        [consts.drug.name, drugObject.name],
-        [consts.drug.rxcui, drugObject.rxcui],
-        [consts.occurrence.occurrence, occurrenceData],
-        [consts.intake.intakeDates, intakeData],
-        [consts.dose.dose, doseData],
-        [consts.refill.refill, refillData]
+        [consts.drug.drugId, drugId], [consts.drug.name, drugObject.name], [consts.drug.rxcui, drugObject.rxcui],
+        [consts.occurrence.occurrence, occurrenceData], [consts.intake.intakeDates, intakeData],
+        [consts.dose.dose, doseData], [consts.refill.refill, refillData]
     );
+}
+
+function prepareMapObject(key1,value1,key2,value2){
+    let mapObject = {};
+    mapObject[key1] = value1;
+    mapObject[key2] = value2;
+    return mapObject;
 }
 
 async function deleteFutureOccurrencesOfDrugByUser(userId, profileId, drug_id, repeat_end) {
